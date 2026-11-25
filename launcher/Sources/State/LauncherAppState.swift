@@ -501,6 +501,15 @@ final class LauncherAppState: ObservableObject {
     }
 
     func checkLauncherUpdates(manual: Bool, forceRefresh: Bool = false) {
+        // Off by default: no request leaves this Mac unless the user turns update checks on.
+        if !settingsDraft.updateChecksEnabled {
+            if manual {
+                releaseUpdateStatusMessage = nil
+                releaseUpdateErrorMessage = "Update checks are off. Turn them on above first."
+            }
+            return
+        }
+
         if !forceRefresh, !manual,
            let lastReleaseCheckAt,
            Date().timeIntervalSince(lastReleaseCheckAt) < 600 {

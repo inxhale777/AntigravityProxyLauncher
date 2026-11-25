@@ -162,6 +162,17 @@ struct SettingsView: View {
 
                         Divider()
 
+                        Toggle(isOn: $appState.settingsDraft.updateChecksEnabled) {
+                            Text("Check for updates")
+                        }
+                        .toggleStyle(.switch)
+
+                        if !appState.settingsDraft.updateChecksEnabled {
+                            Text("Off by default: the app does not contact GitHub about new versions. Turn on to check this fork's releases.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+
                         HStack {
                             Text("Current version")
                                 .frame(width: 100, alignment: .leading)
@@ -173,7 +184,7 @@ struct SettingsView: View {
                         HStack {
                             Text("Update source")
                                 .frame(width: 100, alignment: .leading)
-                            TextField("GitHub repository, e.g. OpsinTech/AntigravityProxyLauncher", text: $appState.settingsDraft.releaseFeedURL)
+                            TextField("GitHub repository, e.g. inxhale777/AntigravityProxyLauncher", text: $appState.settingsDraft.releaseFeedURL)
                                 .textFieldStyle(.roundedBorder)
                         }
 
@@ -212,12 +223,14 @@ struct SettingsView: View {
                                 ButtonLabel(icon: "arrow.down.circle", text: "Check for updates")
                             }
                             .primaryActionStyle()
+                            .disabled(!appState.settingsDraft.updateChecksEnabled)
 
                             Button(action: { appState.checkLauncherUpdates(manual: true, forceRefresh: true) }) {
                                 ButtonLabel(icon: "arrow.clockwise", text: "Force refresh")
                             }
                             .secondaryActionStyle()
                             .help("Clear cache and check again")
+                            .disabled(!appState.settingsDraft.updateChecksEnabled)
 
                             if let info = appState.releaseUpdateInfo, info.isUpdateAvailable, !appState.isReleaseVersionIgnored(info.latestVersion) {
                                 Text("New version available: \(info.latestVersion)")

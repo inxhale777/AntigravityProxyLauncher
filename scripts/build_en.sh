@@ -5,6 +5,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+VERSION="$(tr -d '[:space:]' < "$ROOT/launcher/Resources/version.txt")"
 OUT="$ROOT/build_output/en"
 APP="$OUT/AntigravityProxyLauncher.app"
 
@@ -26,8 +27,10 @@ echo "[3/4] launcher"
 (cd "$ROOT/launcher" && xcodegen generate > "$OUT/xcodegen.log" 2>&1)
 xcodebuild -project "$ROOT/launcher/AntigravityProxyLauncher.xcodeproj" -scheme AntigravityProxyLauncher \
   -configuration Release -destination 'generic/platform=macOS' ARCHS=arm64 ONLY_ACTIVE_ARCH=NO \
+  MARKETING_VERSION="$VERSION" CURRENT_PROJECT_VERSION="$VERSION" \
   CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO \
   CONFIGURATION_BUILD_DIR="$OUT/int/app" build > "$OUT/app.log" 2>&1
+test -d "$OUT/int/app/AntigravityProxyLauncher.app" || { echo "error: launcher build failed, see $OUT/app.log" >&2; exit 1; }
 
 echo "[4/4] bundle and sign"
 mv "$OUT/int/app/AntigravityProxyLauncher.app" "$APP"
