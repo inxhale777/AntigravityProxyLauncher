@@ -12,10 +12,10 @@ struct ProxyProbeResult {
 
     var summary: String {
         if !reachable {
-            return "无法连接 \(host):\(port)"
+            return "Cannot connect to \(host):\(port)"
         }
         if !handshakeOK {
-            return "\(host):\(port) 端口可达，但 \(proxyType.uppercased()) 握手失败"
+            return "\(host):\(port) is reachable, but the \(proxyType.uppercased()) handshake failed"
         }
         if let ms = latencyMs {
             return "\(proxyType.uppercased()) \(host):\(port) ✓ (\(String(format: "%.0f", ms))ms)"
@@ -72,7 +72,7 @@ struct ProxyConnectivityService {
             let totalTime = (CFAbsoluteTimeGetCurrent() - start) * 1000
             return ProxyProbeResult(reachable: true, handshakeOK: handshakeOK,
                                     latencyMs: totalTime,
-                                    error: handshakeOK ? nil : "SOCKS5 握手超时或拒绝",
+                                    error: handshakeOK ? nil : "SOCKS5 handshake timed out or was refused",
                                     proxyType: type, host: host, port: port)
         }
 

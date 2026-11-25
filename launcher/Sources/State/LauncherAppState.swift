@@ -16,10 +16,10 @@ struct MenuBarAppStatus {
     let isPatched: Bool
 
     var statusText: String {
-        if isRunning { return "运行中" }
-        if isPatched { return "已就绪" }
-        if isInstalled { return "已安装" }
-        return "未安装"
+        if isRunning { return "Running" }
+        if isPatched { return "Ready" }
+        if isInstalled { return "Installed" }
+        return "Not installed"
     }
 }
 
@@ -63,7 +63,7 @@ final class LauncherAppState: ObservableObject {
             allAppLogs[oldValue] = logLines
             logLines = allAppLogs[selectedApp] ?? []
             
-            appendLog("---------- 切换到 \(selectedApp.displayName) ----------")
+            appendLog("---------- Switched to \(selectedApp.displayName) ----------")
             refresh()
         }
     }
@@ -78,7 +78,7 @@ final class LauncherAppState: ObservableObject {
         launchService.onAppTerminated = { [weak self] in
             Task { @MainActor in
                 guard let self else { return }
-                self.appendLog("修复版应用已退出")
+                self.appendLog("Patched app has quit")
                 self.refresh()
             }
         }
@@ -155,8 +155,8 @@ final class LauncherAppState: ObservableObject {
             }
             if !probeResult.isOK {
                 await MainActor.run {
-                    appendLog("修复终止: 代理未连接 (\(probeResult.summary))，请先确保代理连通后再修复。")
-                    status = .error("代理未连接: \(probeResult.summary)")
+                    appendLog("Repair aborted: proxy not connected (\(probeResult.summary)). Make sure the proxy works before repairing.")
+                    status = .error("Proxy not connected: \(probeResult.summary)")
                     isRunningWorkflow = false
                 }
                 return
@@ -166,7 +166,7 @@ final class LauncherAppState: ObservableObject {
             let diskCheckResult = await checkDiskSpace()
             if !diskCheckResult.ok {
                 await MainActor.run {
-                    appendLog("修复终止: \(diskCheckResult.message)")
+                    appendLog("Repair aborted: \(diskCheckResult.message)")
                     status = .error(diskCheckResult.message)
                     isRunningWorkflow = false
                 }
@@ -186,7 +186,7 @@ final class LauncherAppState: ObservableObject {
                     if let freeBytes = values.volumeAvailableCapacity {
                         let freeGB = Double(freeBytes) / 1_073_741_824.0
                         if freeGB < 2.0 {
-                            cont.resume(returning: (false, "磁盘可用空间不足 (剩余 \(String(format: "%.1f", freeGB)) GB，需要至少 2 GB)"))
+                            cont.resume(returning: (false, "Not enough free disk space (\(String(format: "%.1f", freeGB)) GB left, at least 2 GB needed)"))
                             return
                         }
                     }
@@ -204,7 +204,7 @@ final class LauncherAppState: ObservableObject {
         isRunningWorkflow = true
 
         let isCLI = selectedApp.targetType == .cliBinary
-        appendLog(isCLI ? "验证 CLI 安装..." : "直接启动已修复的应用...")
+        appendLog(isCLI ? "Verifying the CLI installation..." : "Launching the patched app directly...")
         status = .launching
 
         Task {
@@ -213,21 +213,21 @@ final class LauncherAppState: ObservableObject {
                 await MainActor.run {
                     if isCLI {
                         if let output = cliOutput, !output.isEmpty {
-                            self.appendLog("\(self.selectedApp.displayName) 版本: \(output)")
+                            self.appendLog("\(self.selectedApp.displayName) version: \(output)")
                         }
-                        self.appendLog("验证通过：\(self.selectedApp.displayName) 代理注入已就绪，可在终端使用 \(self.selectedApp.executableName) 命令。")
+                        self.appendLog("Verified: proxy injection for \(self.selectedApp.displayName) is ready. The \(self.selectedApp.executableName) command is available in a terminal.")
                         self.status = .patchedReady
                     } else {
-                        self.appendLog("启动成功！")
+                        self.appendLog("Launched successfully!")
                         self.status = .running
                     }
                     self.isRunningWorkflow = false
                 }
             } catch {
                 await MainActor.run {
-                    self.appendLog("\(isCLI ? "验证" : "启动")失败: \(error.localizedDescription)")
+                    self.appendLog("\(isCLI ? "Verify" : "Launch") failed: \(error.localizedDescription)")
                     LauncherLogger.error("Direct launch failed: \(error)")
-                    self.status = .error("\(isCLI ? "验证" : "启动")失败: \(error.localizedDescription)")
+                    self.status = .error("\(isCLI ? "Verify" : "Launch") failed: \(error.localizedDescription)")
                     self.isRunningWorkflow = false
                 }
             }
@@ -238,7 +238,7 @@ final class LauncherAppState: ObservableObject {
         guard !isRunningWorkflow else { return }
 
         isRunningWorkflow = true
-        appendLog("正在关闭修复版应用...")
+        appendLog("Closing the patched app...")
 
         Task {
             try? await runBlocking {
@@ -250,7 +250,7 @@ final class LauncherAppState: ObservableObject {
             }
 
             if stillRunning {
-                let message = "关闭失败：检测到修复版仍在运行"
+                let message = "Failed to close: the patched app is still running"
                 await MainActor.run {
                     self.appendLog(message)
                     self.status = .error(message)
@@ -260,7 +260,7 @@ final class LauncherAppState: ObservableObject {
             }
 
             await MainActor.run {
-                self.appendLog("修复版已关闭")
+                self.appendLog("Patched app closed")
                 self.isRunningWorkflow = false
                 self.refresh()
             }
@@ -277,7 +277,7 @@ final class LauncherAppState: ObservableObject {
         do {
             if fm.fileExists(atPath: FileSystemPaths.patchLogFile.path) {
                 try fm.removeItem(at: FileSystemPaths.patchLogFile)
-                clearedTargets.append("修复日志")
+                clearedTargets.append("Repair log")
             }
 
             // Clean up dylib per-process log files (antigravity_proxy.{pid}.log)
@@ -301,24 +301,24 @@ final class LauncherAppState: ObservableObject {
                     }
                 }
                 if removed > 0 {
-                    clearedTargets.append("\(removed) 个 dylib 日志文件")
+                    clearedTargets.append("\(removed) dylib log files")
                 }
             }
 
             if clearedTargets.isEmpty {
-                appendLog("日志已清理：未发现可删除的日志文件")
+                appendLog("Logs cleared: no log files to delete were found")
             } else {
-                appendLog("日志已清理：\(clearedTargets.joined(separator: "、"))")
+                appendLog("Logs cleared: \(clearedTargets.joined(separator: ", "))")
             }
         } catch {
-            appendLog("日志清理失败: \(error.localizedDescription)")
+            appendLog("Failed to clear logs: \(error.localizedDescription)")
         }
     }
 
     func cleanEnvironment() {
         guard !isRunningWorkflow else { return }
         
-        appendLog("开始清理运行环境（不含日志）...")
+        appendLog("Cleaning the runtime environment (logs excluded)...")
         status = .cleaning
         isRunningWorkflow = true
         
@@ -336,9 +336,9 @@ final class LauncherAppState: ObservableObject {
                         let cliDir = FileSystemPaths.patchedCLIDir
                         if fm.fileExists(atPath: cliDir.path) {
                             try fm.removeItem(at: cliDir)
-                            report("已移除 CLI 修复目录: \(cliDir.path)")
+                            report("CLI repair directory removed: \(cliDir.path)")
                         } else {
-                            report("未发现 CLI 修复目录，跳过清理")
+                            report("No CLI repair directory found, nothing to clean up")
                         }
 
                         // Restore original binary from backup if it exists
@@ -349,33 +349,33 @@ final class LauncherAppState: ObservableObject {
                                 try fm.removeItem(at: targetPath)
                             }
                             try fm.copyItem(at: URL(fileURLWithPath: backupPath), to: targetPath)
-                            report("已还原原始 \(FileSystemPaths.activeApp.displayName) 二进制: \(backupPath)")
+                            report("Original \(FileSystemPaths.activeApp.displayName) binary restored: \(backupPath)")
                         }
                     } else {
                         if fm.fileExists(atPath: FileSystemPaths.patchedApp.path) {
                             try fm.removeItem(at: FileSystemPaths.patchedApp)
-                            report("已移除破解 App: \(FileSystemPaths.patchedApp.path)")
+                            report("Patched app removed: \(FileSystemPaths.patchedApp.path)")
                         } else {
-                            report("未发现破解 App，跳过清理")
+                            report("No patched app found, nothing to clean up")
                         }
                     }
 
                     let metaURL = FileSystemPaths.appSupportRoot.appendingPathComponent("patch_metadata.json")
                     if fm.fileExists(atPath: metaURL.path) {
                         try fm.removeItem(at: metaURL)
-                        report("已移除元数据配置文件: \(metaURL.path)")
+                        report("Metadata file removed: \(metaURL.path)")
                     }
                 }
                 
                 await MainActor.run {
-                    self.appendLog("环境清理流程执行完毕！")
+                    self.appendLog("Environment cleanup finished!")
                     self.isRunningWorkflow = false
                     self.refresh()
                 }
             } catch {
                 await MainActor.run {
-                    self.appendLog("清理失败: \(error.localizedDescription)")
-                    self.status = .error("清理失败: \(error.localizedDescription)")
+                    self.appendLog("Cleanup failed: \(error.localizedDescription)")
+                    self.status = .error("Cleanup failed: \(error.localizedDescription)")
                     self.isRunningWorkflow = false
                 }
             }
@@ -393,8 +393,8 @@ final class LauncherAppState: ObservableObject {
             // 兜底：加载失败时使用默认值，提示用户编辑保存
             proxyConfigDraft = .default
             configErrorMessage = nil
-            configStatusMessage = "首次使用，请编辑代理配置后保存"
-            appendLog("代理配置初始化完成，使用默认值")
+            configStatusMessage = "First run: edit the proxy configuration and save"
+            appendLog("Proxy configuration initialized with defaults")
         }
     }
 
@@ -412,8 +412,8 @@ final class LauncherAppState: ObservableObject {
             modelRoutingErrorMessage = nil
             hasLoadedModelRoutingConfigs = true
         } catch {
-            modelRoutingErrorMessage = "加载模型映射配置失败: \(error.localizedDescription)"
-            appendLog("加载模型映射配置失败: \(error.localizedDescription)")
+            modelRoutingErrorMessage = "Failed to load model mapping: \(error.localizedDescription)"
+            appendLog("Failed to load model mapping: \(error.localizedDescription)")
         }
     }
 
@@ -428,27 +428,27 @@ final class LauncherAppState: ObservableObject {
         do {
             try modelRoutingService.save(modelRoutingConfig)
             modelRoutingErrorMessage = nil
-            appendLog("模型映射配置已保存。")
+            appendLog("Model mapping configuration saved.")
         } catch {
-            modelRoutingErrorMessage = "保存模型映射配置失败: \(error.localizedDescription)"
-            appendLog("保存模型映射配置失败: \(error.localizedDescription)")
+            modelRoutingErrorMessage = "Failed to save model mapping: \(error.localizedDescription)"
+            appendLog("Failed to save model mapping: \(error.localizedDescription)")
         }
     }
 
     func saveProxyConfig() {
         do {
             let result = try proxyConfigService.saveForNextPatch(proxyConfigDraft)
-            configStatusMessage = "配置已保存"
+            configStatusMessage = "Configuration saved"
             configErrorMessage = nil
-            appendLog("代理配置已保存: \(result.userConfigPath)")
+            appendLog("Proxy configuration saved: \(result.userConfigPath)")
             // The Go gateway pins its upstream endpoint and routing mode at
             // launch, so saved changes only take effect after a restart. Do it
             // now instead of leaving the process dialing a dead port (every
             // request then fails as "502 Upstream error").
             ProxyManager.shared.restartIfRuntimeConfigChanged(to: proxyConfigDraft)
         } catch {
-            configErrorMessage = "保存配置失败: \(error.localizedDescription)"
-            appendLog("保存代理配置失败: \(error.localizedDescription)")
+            configErrorMessage = "Failed to save configuration: \(error.localizedDescription)"
+            appendLog("Failed to save proxy configuration: \(error.localizedDescription)")
         }
     }
 
@@ -478,8 +478,8 @@ final class LauncherAppState: ObservableObject {
             applyDockIconSetting()
             checkLauncherUpdates(manual: false)
         } catch {
-            settingsErrorMessage = "加载设置失败: \(error.localizedDescription)"
-            appendLog("加载设置失败: \(error.localizedDescription)")
+            settingsErrorMessage = "Failed to load settings: \(error.localizedDescription)"
+            appendLog("Failed to load settings: \(error.localizedDescription)")
         }
     }
 
@@ -491,14 +491,14 @@ final class LauncherAppState: ObservableObject {
                 .trimmingCharacters(in: .whitespacesAndNewlines)
             try settingsService.save(settingsDraft)
             applyDockIconSetting()
-            settingsStatusMessage = "设置已保存"
+            settingsStatusMessage = "Settings saved"
             settingsErrorMessage = nil
-            appendLog("设置已保存: \(FileSystemPaths.settingsFile.path)")
+            appendLog("Settings saved: \(FileSystemPaths.settingsFile.path)")
             checkLauncherUpdates(manual: false)
         } catch {
-            settingsErrorMessage = "保存设置失败: \(error.localizedDescription)"
+            settingsErrorMessage = "Failed to save settings: \(error.localizedDescription)"
             settingsStatusMessage = nil
-            appendLog("保存设置失败: \(error.localizedDescription)")
+            appendLog("Failed to save settings: \(error.localizedDescription)")
         }
     }
 
@@ -514,16 +514,16 @@ final class LauncherAppState: ObservableObject {
         let normalizedCode = code.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
         let encoded = Data(normalizedCode.utf8).base64EncodedString()
         if normalizedCode.isEmpty {
-            return (false, "激活码不能为空")
+            return (false, "The activation code cannot be empty")
         }
         
         if validActivationCodes.contains(encoded) {
             settingsDraft.isActivated = true
             isActivated = true
             saveSettings()
-            return (true, "激活成功")
+            return (true, "Activated")
         } else {
-            return (false, "激活码无效，请关注公众号获取正确激活码")
+            return (false, "Invalid activation code. Follow the author's WeChat account to get the correct one")
         }
     }
 
@@ -537,7 +537,7 @@ final class LauncherAppState: ObservableObject {
         let feedURL = settingsDraft.releaseFeedURL.trimmingCharacters(in: .whitespacesAndNewlines)
         if feedURL.isEmpty {
             if manual {
-                releaseUpdateErrorMessage = "请先填写更新信息 URL"
+                releaseUpdateErrorMessage = "Enter the update information URL first"
                 releaseUpdateStatusMessage = nil
             }
             return
@@ -548,7 +548,7 @@ final class LauncherAppState: ObservableObject {
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
 
-        releaseUpdateStatusMessage = "正在检查 Launcher 更新..."
+        releaseUpdateStatusMessage = "Checking for launcher updates..."
         releaseUpdateErrorMessage = nil
         lastReleaseCheckAt = Date()
 
@@ -575,22 +575,22 @@ final class LauncherAppState: ObservableObject {
 
                 if result.isUpdateAvailable {
                     if isReleaseVersionIgnored(result.latestVersion) {
-                        releaseUpdateStatusMessage = "已忽略版本 \(result.latestVersion) 的提醒"
+                        releaseUpdateStatusMessage = "Reminder for version \(result.latestVersion) ignored"
                     } else {
-                        releaseUpdateStatusMessage = "发现新版本 \(result.latestVersion)"
+                        releaseUpdateStatusMessage = "New version \(result.latestVersion) available"
                     }
-                    appendLog("发现 Launcher 新版本: \(result.latestVersion)")
+                    appendLog("New launcher version available: \(result.latestVersion)")
                 } else {
-                    releaseUpdateStatusMessage = "当前已是最新版本 (\(result.currentVersion))"
-                    appendLog("Launcher 版本检查完成：已是最新版本")
+                    releaseUpdateStatusMessage = "Already up to date (\(result.currentVersion))"
+                    appendLog("Version check complete: launcher is up to date")
                 }
                 releaseUpdateErrorMessage = nil
             } catch {
                 if manual {
-                    releaseUpdateErrorMessage = "更新检查失败: \(error.localizedDescription)"
+                    releaseUpdateErrorMessage = "Update check failed: \(error.localizedDescription)"
                 }
                 releaseUpdateStatusMessage = nil
-                appendLog("更新检查失败: \(error.localizedDescription)")
+                appendLog("Update check failed: \(error.localizedDescription)")
             }
         }
     }
@@ -612,14 +612,14 @@ final class LauncherAppState: ObservableObject {
 
         do {
             try settingsService.save(settingsDraft)
-            settingsStatusMessage = "已忽略版本 \(latest) 的更新提醒"
+            settingsStatusMessage = "Update reminder for version \(latest) ignored"
             settingsErrorMessage = nil
-            releaseUpdateStatusMessage = "已忽略版本 \(latest) 的提醒"
+            releaseUpdateStatusMessage = "Reminder for version \(latest) ignored"
             releaseUpdateErrorMessage = nil
-            appendLog("已忽略 Launcher 更新版本: \(latest)")
+            appendLog("Launcher update ignored: \(latest)")
         } catch {
-            settingsErrorMessage = "保存忽略版本失败: \(error.localizedDescription)"
-            appendLog("保存忽略版本失败: \(error.localizedDescription)")
+            settingsErrorMessage = "Failed to save the ignored version: \(error.localizedDescription)"
+            appendLog("Failed to save the ignored version: \(error.localizedDescription)")
         }
     }
 
@@ -633,15 +633,15 @@ final class LauncherAppState: ObservableObject {
 
         do {
             try settingsService.save(settingsDraft)
-            settingsStatusMessage = "已恢复更新提醒"
+            settingsStatusMessage = "Update reminders restored"
             settingsErrorMessage = nil
-            releaseUpdateStatusMessage = "已恢复更新提醒"
+            releaseUpdateStatusMessage = "Update reminders restored"
             releaseUpdateErrorMessage = nil
-            appendLog("已恢复 Launcher 更新提醒")
+            appendLog("Launcher update reminders restored")
         } catch {
             settingsDraft.releaseIgnoredVersion = previous
-            settingsErrorMessage = "恢复更新提醒失败: \(error.localizedDescription)"
-            appendLog("恢复更新提醒失败: \(error.localizedDescription)")
+            settingsErrorMessage = "Failed to restore update reminders: \(error.localizedDescription)"
+            appendLog("Failed to restore update reminders: \(error.localizedDescription)")
         }
     }
 
@@ -685,27 +685,27 @@ final class LauncherAppState: ObservableObject {
         isRunningWorkflow = true
         resetWorkflow()
         status = .patching
-        appendLog("开始执行修复流程")
+        appendLog("Starting the repair flow")
 
         do {
             markStep(.detect, as: .running)
             guard let app = appDetectionService.detectInstalledTargetApp() else {
-                markStep(.detect, as: .failed, detail: "未找到 \(selectedApp.defaultPath)")
+                markStep(.detect, as: .failed, detail: "Not found: \(selectedApp.defaultPath)")
                 status = .targetAppMissing
-                appendLog("失败: 未检测到原版应用 (\(selectedApp.displayName))")
+                appendLog("Failed: original app not detected (\(selectedApp.displayName))")
                 isRunningWorkflow = false
                 return
             }
             appInfo = app
             markStep(.detect, as: .completed, detail: "\(app.version)")
-            appendLog("检测到应用版本: \(app.version)")
+            appendLog("Detected app version: \(app.version)")
 
             markStep(.migration, as: .running)
             try await runBlocking {
                 try self.migrationService.migrateSandboxData()
             }
             markStep(.migration, as: .completed)
-            appendLog("数据迁移完成")
+            appendLog("Data migration complete")
 
             markStep(.patch, as: .running)
             try await runBlocking {
@@ -716,22 +716,22 @@ final class LauncherAppState: ObservableObject {
                 })
             }
             markStep(.patch, as: .completed)
-            appendLog("修复包处理完成")
+            appendLog("Patched bundle processed")
 
             markStep(.verify, as: .running)
             try await runBlocking {
                 try self.verificationService.verifyPatchedResult()
             }
             markStep(.verify, as: .completed)
-            appendLog("修复结果验证通过")
+            appendLog("Repair result verified")
 
-            markStep(.launch, as: .completed, detail: "待手动启动")
+            markStep(.launch, as: .completed, detail: "Waiting for manual launch")
             status = .patchedReady
-            appendLog("修复完成，可手动启动修复版")
+            appendLog("Repair complete. You can now launch the patched app.")
         } catch {
             markCurrentRunningStepFailed(with: error.localizedDescription)
-            status = .error("修复失败: \(error.localizedDescription)")
-            appendLog("失败: \(error.localizedDescription)")
+            status = .error("Repair failed: \(error.localizedDescription)")
+            appendLog("Failed: \(error.localizedDescription)")
 
         }
 

@@ -7,24 +7,24 @@ struct HomeView: View {
     var body: some View {
         NavigationSplitView {
             List(selection: $appState.selectedTab) {
-                Section("核心功能") {
+                Section("Core features") {
                     NavigationLink(value: LauncherTab.overview) {
-                        Label("运行状态", systemImage: "gauge.with.needle")
+                        Label("Run Status", systemImage: "gauge.with.needle")
                     }
                     NavigationLink(value: LauncherTab.proxySettings) {
-                        Label("代理设置", systemImage: "slider.horizontal.3")
+                        Label("Proxy Settings", systemImage: "slider.horizontal.3")
                     }
                     NavigationLink(value: LauncherTab.modelRouting) {
-                        Label("模型映射", systemImage: "arrow.triangle.branch")
+                        Label("Model mapping", systemImage: "arrow.triangle.branch")
                     }
                 }
 
-                Section("维护与设置") {
+                Section("Maintenance & Settings") {
                     NavigationLink(value: LauncherTab.diagnostics) {
-                        Label("系统诊断", systemImage: "stethoscope")
+                        Label("System Diagnostics", systemImage: "stethoscope")
                     }
                     NavigationLink(value: LauncherTab.settings) {
-                        Label("偏好设置", systemImage: "gearshape")
+                        Label("Preferences", systemImage: "gearshape")
                     }
                 }
             }
@@ -71,17 +71,17 @@ private struct SidebarVersionFooter: View {
             if let info = updateInfo {
                 Menu {
                     if let notes = info.notes, !notes.isEmpty {
-                        Text("【更新日志】\n" + notes)
+                        Text("[Changelog]\n" + notes)
                             .font(.system(.caption, design: .monospaced))
                     }
                     Divider()
-                    Button("打开下载页面") {
+                    Button("Open download page") {
                         if let urlString = info.downloadURL,
                            let url = URL(string: urlString) {
                             NSWorkspace.shared.open(url)
                         }
                     }
-                    Button("忽略此版本") {
+                    Button("Ignore this version") {
                         appState.ignoreCurrentReleaseUpdate()
                     }
                 } label: {
@@ -158,10 +158,10 @@ private struct OverviewView: View {
             VStack(alignment: .leading, spacing: 20) {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("运行状态")
+                        Text("Run Status")
                             .font(.title) // title 保持原生 22pt，但副标题放大
                             .bold()
-                        Text("管理底层代理注入状态与核心资源余量")
+                        Text("Manage proxy injection status and core resource usage")
                             .font(.body) // 从 subheadline 放大到 body (13pt)，整体大气
                             .foregroundStyle(.secondary)
                     }
@@ -198,7 +198,7 @@ private struct OverviewView: View {
                                 .buttonStyle(.plain)
                                 .disabled(appState.isRunningWorkflow || isComingSoon)
                                 .opacity(isComingSoon ? 0.4 : 1.0)
-                                .help(isComingSoon ? "随后版本支持" : "")
+                                .help(isComingSoon ? "Coming in a later version" : "")
                             }
                         }
                     }
@@ -210,7 +210,7 @@ private struct OverviewView: View {
                         HStack {
                             Image(systemName: "app.badge.checkmark.fill")
                                 .foregroundStyle(.blue)
-                            Text("核心运行环境")
+                            Text("Core runtime")
                                 .font(.title3)
 
                             Spacer()
@@ -241,7 +241,7 @@ private struct OverviewView: View {
                             }
                             .overlay(alignment: .bottom) {
                                 if isRefreshHovered {
-                                    Text(isRefreshing ? "刷新中..." : "刷新状态")
+                                    Text(isRefreshing ? "Refreshing..." : "Refresh status")
                                         .font(.system(size: 10))
                                         .foregroundStyle(.secondary)
                                         .padding(.horizontal, 6)
@@ -258,24 +258,24 @@ private struct OverviewView: View {
                                 HStack(spacing: 6) {
                                     if appState.status == .running {
                                         Button(action: { appState.stopPatchedAppOnly() }) {
-                                            ButtonLabel(icon: "stop.circle", text: appState.selectedApp.targetType == .cliBinary ? "终止进程" : "关闭应用")
+                                            ButtonLabel(icon: "stop.circle", text: appState.selectedApp.targetType == .cliBinary ? "Terminate process" : "Close app")
                                         }
                                         .dangerActionStyle()
                                         .disabled(appState.isRunningWorkflow)
 
-                                        patchedAppButton(label: "修复应用", disabled: appState.isRunningWorkflow || !proxyConnected)
+                                        patchedAppButton(label: "Repair app", disabled: appState.isRunningWorkflow || !proxyConnected)
                                         cleanEnvironmentButton
                                     } else if appState.status == .patchedReady {
                                         Button(action: { appState.launchPatchedAppOnly() }) {
-                                            ButtonLabel(icon: "play.circle", text: appState.selectedApp.targetType == .cliBinary ? "验证安装" : "启动应用")
+                                            ButtonLabel(icon: "play.circle", text: appState.selectedApp.targetType == .cliBinary ? "Verify installation" : "Launch app")
                                         }
                                         .successActionStyle()
                                         .disabled(appState.isRunningWorkflow)
 
-                                        patchedAppButton(label: "修复应用", disabled: appState.isRunningWorkflow || !proxyConnected)
+                                        patchedAppButton(label: "Repair app", disabled: appState.isRunningWorkflow || !proxyConnected)
                                         cleanEnvironmentButton
                                     } else {
-                                        patchedAppButton(label: "修复应用", disabled: appState.isRunningWorkflow || !proxyConnected)
+                                        patchedAppButton(label: "Repair app", disabled: appState.isRunningWorkflow || !proxyConnected)
                                         cleanEnvironmentButton
                                     }
                                 }
@@ -288,7 +288,7 @@ private struct OverviewView: View {
                                 Image(systemName: "exclamationmark.triangle.fill")
                                     .font(.system(size: 10))
                                     .foregroundStyle(.orange)
-                                Text("请先在代理设置中点击「检测」确认代理已连接")
+                                Text("Click Detect in Proxy Settings first to confirm the proxy is connected")
                                     .font(.system(size: 11))
                                     .foregroundStyle(.orange)
                             }
@@ -301,7 +301,7 @@ private struct OverviewView: View {
                                     if appState.selectedApp.targetType != .cliBinary {
                                         InfoItem(icon: "tag", title: "Bundle ID", value: app.bundleIdentifier)
                                     }
-                                    InfoItem(icon: "number", title: "环境版本", value: app.version)
+                                    InfoItem(icon: "number", title: "Environment version", value: app.version)
                                 }
 
                                 Divider()
@@ -309,7 +309,7 @@ private struct OverviewView: View {
 
                                 InfoItem(
                                     icon: "checkmark.seal.fill",
-                                    title: "当前环境状态",
+                                    title: "Current environment status",
                                     value: appState.status.title,
                                     valueColor: statusColor,
                                     isMono: false,
@@ -324,22 +324,22 @@ private struct OverviewView: View {
                                         .frame(width: 14, alignment: .top)
                                         .padding(.top, 2)
                                     VStack(alignment: .leading, spacing: 2) {
-                                        Text("模型映射")
+                                        Text("Model mapping")
                                             .font(.subheadline)
                                             .foregroundStyle(.secondary)
-                                        Text(appState.proxyConfigDraft.mitm?.modelRoutingEnabled == true ? "已开启" : "未开启")
+                                        Text(appState.proxyConfigDraft.mitm?.modelRoutingEnabled == true ? "On" : "Off")
                                             .font(.body)
                                             .foregroundStyle(appState.proxyConfigDraft.mitm?.modelRoutingEnabled == true ? .green : .secondary)
                                     }
                                 }
 
-                                InfoItem(icon: "macwindow", title: "官方原版路径", value: app.appPath, isMono: true)
+                                InfoItem(icon: "macwindow", title: "Original app path", value: app.appPath, isMono: true)
 
                                 let isPatchedAppExists = FileManager.default.fileExists(atPath: FileSystemPaths.patchedApp.path)
                                 InfoItem(
                                     icon: "lock.open",
-                                    title: "解锁版 App 路径",
-                                    value: isPatchedAppExists ? FileSystemPaths.patchedApp.path : "(未生成/已清理)",
+                                    title: "Unlocked app path",
+                                    value: isPatchedAppExists ? FileSystemPaths.patchedApp.path : "(not generated / cleaned up)",
                                     valueColor: isPatchedAppExists ? .primary : .secondary,
                                     isMono: true
                                 )
@@ -350,8 +350,8 @@ private struct OverviewView: View {
 
                                 InfoItem(
                                     icon: "key",
-                                    title: "当前授权环境目录",
-                                    value: hasTokenFiles ? tokenDirPath : "(未授权)",
+                                    title: "Current authorization directory",
+                                    value: hasTokenFiles ? tokenDirPath : "(not authorized)",
                                     valueColor: hasTokenFiles ? .primary : .secondary,
                                     isMono: true
                                 )
@@ -362,10 +362,10 @@ private struct OverviewView: View {
                                 Image(systemName: "app.dashed")
                                     .font(.system(size: 32))
                                     .foregroundStyle(.secondary.opacity(0.5))
-                                Text("未检测到目标应用")
+                                Text("Target app not detected")
                                     .font(.headline)
                                     .foregroundStyle(.secondary)
-                                Text("请先安装 \(appState.selectedApp.displayName)，然后点击刷新")
+                                Text("Install \(appState.selectedApp.displayName) first, then refresh")
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                                     .multilineTextAlignment(.center)
@@ -394,7 +394,7 @@ private struct OverviewView: View {
                         HStack {
                             Image(systemName: "checklist")
                                 .foregroundStyle(.orange)
-                            Text("流程进度")
+                            Text("Progress")
                                 .font(.title3)
                         }
 
@@ -455,7 +455,7 @@ private struct OverviewView: View {
                                 HStack(spacing: 4) {
                                     Image(systemName: justCopiedLogs ? "checkmark" : "doc.on.doc")
                                         .font(.system(size: 8))
-                                    Text(justCopiedLogs ? "已复制" : "复制日志")
+                                    Text(justCopiedLogs ? "Copied" : "Copy log")
                                         .font(.system(size: 8, weight: .bold, design: .monospaced))
                                 }
                                 .foregroundStyle(justCopiedLogs ? .green : Color(red: 0.65, green: 0.68, blue: 0.76))
@@ -465,7 +465,7 @@ private struct OverviewView: View {
                                 .clipShape(RoundedRectangle(cornerRadius: 4))
                             }
                             .buttonStyle(.plain)
-                            .help("复制所有运行日志")
+                            .help("Copy all runtime logs")
 
                             // 清理日志按钮
                             Button(action: {
@@ -474,7 +474,7 @@ private struct OverviewView: View {
                                 HStack(spacing: 4) {
                                     Image(systemName: "trash")
                                         .font(.system(size: 8))
-                                    Text("清理日志")
+                                    Text("Clear logs")
                                         .font(.system(size: 8, weight: .bold, design: .monospaced))
                                 }
                                 .foregroundStyle(Color(red: 0.91, green: 0.49, blue: 0.50))
@@ -484,18 +484,18 @@ private struct OverviewView: View {
                                 .clipShape(RoundedRectangle(cornerRadius: 4))
                             }
                             .buttonStyle(.plain)
-                            .help("清空修复日志与系统日志")
+                            .help("Clear the repair log and system log")
                             .confirmationDialog(
-                                "确认清理日志",
+                                "Confirm log cleanup",
                                 isPresented: $showClearLogsConfirm,
                                 titleVisibility: .visible
                             ) {
-                                Button("确认清理", role: .destructive) {
+                                Button("Confirm cleanup", role: .destructive) {
                                     appState.clearLogs()
                                 }
-                                Button("取消", role: .cancel) {}
+                                Button("Cancel", role: .cancel) {}
                             } message: {
-                                Text("将删除修复日志和运行日志文件，此操作不可恢复。")
+                                Text("This deletes the repair log and runtime log files. This cannot be undone.")
                             }
                         }
                         .padding(.horizontal, 12)
@@ -555,24 +555,24 @@ private struct OverviewView: View {
 
     private var cleanEnvironmentButton: some View {
         Button(action: { showCleanEnvironmentConfirm = true }) {
-            ButtonLabel(icon: "trash", text: "清理环境")
+            ButtonLabel(icon: "trash", text: "Clean environment")
         }
         .dangerActionStyle()
         .disabled(appState.isRunningWorkflow)
         .confirmationDialog(
-            "确认清理环境",
+            "Confirm environment cleanup",
             isPresented: $showCleanEnvironmentConfirm,
             titleVisibility: .visible
         ) {
-            Button("确认清理", role: .destructive) {
+            Button("Confirm cleanup", role: .destructive) {
                 appState.cleanEnvironment()
             }
-            Button("取消", role: .cancel) {}
+            Button("Cancel", role: .cancel) {}
         } message: {
             if appState.selectedApp.targetType == .cliBinary {
-                Text("将删除当前 \(appState.selectedApp.displayName) 的修复目录及符号链接，并还原原始二进制文件（如有备份）。")
+                Text("This deletes the repair directory and symbolic link for \(appState.selectedApp.displayName) and restores the original binary (if a backup exists).")
             } else {
-                Text("将删除当前 \(appState.selectedApp.displayName) 的解锁版应用及相关配置文件。")
+                Text("This deletes the unlocked app for \(appState.selectedApp.displayName) and its configuration files.")
             }
         }
     }
@@ -678,7 +678,7 @@ private struct InfoItem: View {
                                     .foregroundStyle(justCopied ? .green : .secondary)
                             }
                             .buttonStyle(.plain)
-                            .help(justCopied ? "已复制" : "复制路径")
+                            .help(justCopied ? "Copied" : "Copy path")
                             
                             if value.hasPrefix("/") {
                                 Button(action: {
@@ -690,7 +690,7 @@ private struct InfoItem: View {
                                         .foregroundStyle(.secondary)
                                 }
                                 .buttonStyle(.plain)
-                                .help("在 Finder 中定位")
+                                .help("Reveal in Finder")
                             }
                         }
                         .transition(.opacity)
@@ -727,7 +727,7 @@ private struct ProxyStatusInfo: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 HStack(spacing: 6) {
-                    Text("代理连通性")
+                    Text("Proxy connectivity")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
 
@@ -736,17 +736,17 @@ private struct ProxyStatusInfo: View {
                         .frame(width: 6, height: 6)
 
                     if let result = lastResult {
-                        Text(result.isOK ? "已连接" : "异常")
+                        Text(result.isOK ? "Connected" : "Error")
                             .font(.caption)
                             .foregroundStyle(result.isOK ? Color.green : Color.red)
                     } else {
-                        Text("未检测")
+                        Text("Not checked")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
 
                     Button(action: { check() }) {
-                        ButtonLabel(icon: "antenna.radiowaves.left.and.right", text: isChecking ? "检测中" : "检测")
+                        ButtonLabel(icon: "antenna.radiowaves.left.and.right", text: isChecking ? "Detecting" : "Detect")
                     }
                     .primaryActionStyle()
                     .disabled(isChecking)
@@ -792,14 +792,14 @@ private struct MitmToggleRow: View {
 
             VStack(alignment: .leading, spacing: 2) {
                 HStack {
-                    Text("模型映射")
+                    Text("Model mapping")
                         .font(.subheadline)
                         .foregroundStyle(isGemini ? Color.secondary.opacity(0.4) : Color.secondary)
 
                     Spacer()
 
                     if isGemini {
-                        Text("不支持")
+                        Text("Not supported")
                             .font(.system(size: 11))
                             .foregroundStyle(.secondary)
                             .padding(.trailing, 4)
@@ -818,13 +818,13 @@ private struct MitmToggleRow: View {
                         .toggleStyle(.switch)
                         .labelsHidden()
                         .scaleEffect(0.85)
-                        .help("切换后会自动重启本地网关并生效")
+                        .help("The local gateway restarts automatically after you switch")
                     }
                 }
 
                 Text(isGemini
-                     ? "Gemini 为独立应用通道，无需模型映射"
-                     : "将 AI 接口请求重定向至本地转译代理，切换后自动重启网关生效")
+                     ? "Gemini is a separate app channel and needs no model mapping"
+                     : "Redirect AI API requests to the local translation proxy. The gateway restarts automatically after you switch.")
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
             }

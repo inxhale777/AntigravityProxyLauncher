@@ -20,16 +20,16 @@ extension GoogleOAuthError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .missingClientCredential:
-            return "缺少有效的 Google OAuth 凭据。请在设置页填写并保存 Client ID / Client Secret，或设置环境变量 AG_GOOGLE_CLIENT_ID / AG_GOOGLE_CLIENT_SECRET。"
+            return "Valid Google OAuth credentials are missing. Enter and save the Client ID / Client Secret in Settings, or set the AG_GOOGLE_CLIENT_ID / AG_GOOGLE_CLIENT_SECRET environment variables."
         case .invalidClientCredential(let detail):
             if detail.isEmpty {
-                return "Google OAuth 客户端配置无效（invalid_client）。请检查 Client ID / Client Secret 是否正确。"
+                return "Invalid Google OAuth client (invalid_client). Check the Client ID / Client Secret."
             }
-            return "Google OAuth 客户端配置无效（invalid_client）：\(detail)"
+            return "Invalid Google OAuth client (invalid_client): \(detail)"
         case .callbackServerUnavailable:
             return "OAuth callback server is unavailable."
         case .openBrowserFailed(let authURL):
-            return "无法打开浏览器，请手动访问授权地址: \(authURL)"
+            return "Could not open the browser. Open this authorization URL manually: \(authURL)"
         case .invalidTokenResponse:
             return "Invalid token response from Google OAuth endpoint."
         case .missingRefreshToken:

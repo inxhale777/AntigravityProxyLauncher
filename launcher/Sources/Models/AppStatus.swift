@@ -19,29 +19,29 @@ enum AppStatus: Equatable {
         let isCLI = FileSystemPaths.activeApp.targetType == .cliBinary
         switch self {
         case .targetAppMissing:
-            return "未检测到 \(appName)"
+            return "\(appName) not detected"
         case .targetAppUnsupportedVersion:
-            return "版本不受支持"
+            return "Unsupported version"
         case .targetAppInstalled:
-            return "\(appName) 已安装"
+            return "\(appName) installed"
         case .patchedAppMissing:
-            return "未发现修复版"
+            return "Patched app not found"
         case .patchedAppOutdated:
-            return "修复版已过期"
+            return "Patched app out of date"
         case .patching:
-            return "正在修复"
+            return "Repairing"
         case .cleaning:
-            return "正在清理环境"
+            return "Cleaning environment"
         case .patchedReady:
-            return "修复完成"
+            return "Repair complete"
         case .launching:
-            return isCLI ? "正在验证" : "正在启动"
+            return isCLI ? "Verifying" : "Launching"
         case .running:
-            return isCLI ? "\(appName) 可用" : "运行中"
+            return isCLI ? "\(appName) available" : "Running"
         case .repairRequired:
-            return "需要修复"
+            return "Repair needed"
         case .error:
-            return "错误"
+            return "Error"
         }
     }
 
@@ -51,25 +51,25 @@ enum AppStatus: Equatable {
         let isCLI = FileSystemPaths.activeApp.targetType == .cliBinary
         switch self {
         case .targetAppMissing:
-            return "请先安装 \(appName): \(FileSystemPaths.targetApp.path)"
+            return "Install \(appName) first: \(FileSystemPaths.targetApp.path)"
         case .targetAppUnsupportedVersion(let version):
-            return "当前版本 \(version) 不在兼容列表中。"
+            return "Version \(version) is not in the compatibility list."
         case .targetAppInstalled:
-            return "可执行修复流程。"
+            return "The repair flow can run."
         case .patchedAppMissing:
-            return "尚未生成修复版。"
+            return "The patched app has not been created yet."
         case .patchedAppOutdated:
-            return "检测到原版已更新，需要重新修复。"
+            return "The original app has been updated. Repair again."
         case .patching:
-            return "正在复制、注入资源并写入元数据。"
+            return "Copying and injecting resources and writing metadata."
         case .cleaning:
-            return "正在移除修复版及相关配置碎片。"
+            return "Removing the patched app and related configuration."
         case .patchedReady:
-            return isCLI ? "修复完成，可在终端使用 \(exeName) 命令。" : "可以启动修复版。"
+            return isCLI ? "Repair complete. The \(exeName) command is available in a terminal." : "The patched app can be launched."
         case .launching:
-            return isCLI ? "正在运行 \(exeName) --version 验证安装..." : "正在拉起修复版应用。"
+            return isCLI ? "Running \(exeName) --version to verify the installation..." : "Starting the patched app."
         case .running:
-            return isCLI ? "代理注入已就绪，终端执行 \(exeName) 将自动走代理。" : "修复版正在运行。"
+            return isCLI ? "Proxy injection is ready: running \(exeName) in a terminal goes through the proxy automatically." : "Patched app is running."
         case .repairRequired(let reason):
             return reason
         case .error(let message):

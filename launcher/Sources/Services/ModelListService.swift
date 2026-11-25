@@ -187,10 +187,10 @@ struct ModelListService {
         if host.hasPrefix("https://") { host = String(host.dropFirst(8)) }
         else if host.hasPrefix("http://") { host = String(host.dropFirst(7)); scheme = "http" }
 
-        guard !host.isEmpty else { return (false, "无效的 API 端点") }
+        guard !host.isEmpty else { return (false, "Invalid API endpoint") }
 
         let urlString = "\(scheme)://\(host)\(apiPath)"
-        guard let url = URL(string: urlString) else { return (false, "无效的 API 端点") }
+        guard let url = URL(string: urlString) else { return (false, "Invalid API endpoint") }
 
         // Minimal streaming chat request to test connectivity
         // Some providers (e.g. CodeBuddy) require stream=true
@@ -219,24 +219,24 @@ struct ModelListService {
             let (data, response) = try await URLSession.shared.data(for: request)
 
             guard let httpResponse = response as? HTTPURLResponse else {
-                return (false, "网络请求失败")
+                return (false, "Network request failed")
             }
 
             // 4xx/5xx but NOT related to invalid model — even a model error means the endpoint is reachable
             if httpResponse.statusCode == 401 || httpResponse.statusCode == 403 {
                 // Auth rejected — endpoint is alive but the API key is invalid/expired
-                return (false, "鉴权失败 (HTTP \(httpResponse.statusCode))，请检查 API Key")
+                return (false, "Authentication failed (HTTP \(httpResponse.statusCode)). Check the API key")
             }
             if httpResponse.statusCode < 500 {
                 // 2xx/3xx/4xx all indicate the endpoint is alive and auth works
                 // (model name "ping" might cause 400/404 but that's expected)
-                return (true, "端点可达 (状态 \(httpResponse.statusCode))")
+                return (true, "Endpoint reachable (status \(httpResponse.statusCode))")
             } else {
                 let bodyStr = String(data: data, encoding: .utf8)?.prefix(200) ?? ""
-                return (false, "服务端错误 (HTTP \(httpResponse.statusCode)): \(bodyStr)")
+                return (false, "Server error (HTTP \(httpResponse.statusCode)): \(bodyStr)")
             }
         } catch {
-            return (false, "连接失败: \(error.localizedDescription)")
+            return (false, "Connection failed: \(error.localizedDescription)")
         }
     }
 
@@ -247,8 +247,8 @@ struct ModelListService {
 
         var errorDescription: String? {
             switch self {
-            case .invalidEndpoint: return "无效的 API 端点"
-            case .networkError: return "网络请求失败"
+            case .invalidEndpoint: return "Invalid API endpoint"
+            case .networkError: return "Network request failed"
             case .httpError(let code): return "HTTP \(code)"
             }
         }

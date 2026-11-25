@@ -12,7 +12,7 @@ enum LaunchError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .cliSmokeTestFailed(let output):
-            return "CLI 验证失败: \(output)"
+            return "CLI verification failed: \(output)"
         case .appBundleLaunchFailed(let reason):
             return reason
         }
@@ -64,19 +64,19 @@ final class LaunchService {
         // Pre-launch diagnostics: check critical files exist
         let patchedAppURL = FileSystemPaths.patchedApp
         guard FileManager.default.fileExists(atPath: patchedAppURL.path) else {
-            throw LaunchError.appBundleLaunchFailed("修复版 App 不存在: \(patchedAppURL.path)，请先执行修复")
+            throw LaunchError.appBundleLaunchFailed("Patched app not found: \(patchedAppURL.path). Repair first.")
         }
 
         let resourcesDir = patchedAppURL.appendingPathComponent("Contents/Resources")
         let dylibPath = resourcesDir.appendingPathComponent("libAntigravityTun.dylib").path
         guard FileManager.default.fileExists(atPath: dylibPath) else {
-            throw LaunchError.appBundleLaunchFailed("dylib 缺失: \(dylibPath)，请重新修复")
+            throw LaunchError.appBundleLaunchFailed("dylib missing: \(dylibPath). Repair again.")
         }
 
         let executablePath = patchedAppURL
             .appendingPathComponent("Contents/MacOS/\(FileSystemPaths.activeApp.executableName)").path
         guard FileManager.default.isExecutableFile(atPath: executablePath) else {
-            throw LaunchError.appBundleLaunchFailed("可执行文件不可用: \(executablePath)，请重新修复")
+            throw LaunchError.appBundleLaunchFailed("Executable unavailable: \(executablePath). Repair again.")
         }
 
         try? clearQuarantineAttributes()
@@ -136,7 +136,7 @@ final class LaunchService {
             self.activeAppPID = app.processIdentifier
             return nil
         } catch {
-            throw LaunchError.appBundleLaunchFailed("启动失败: \(error.localizedDescription)")
+            throw LaunchError.appBundleLaunchFailed("Launch failed: \(error.localizedDescription)")
         }
     }
 

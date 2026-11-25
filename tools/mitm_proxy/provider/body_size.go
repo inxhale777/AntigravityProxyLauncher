@@ -31,7 +31,7 @@ func logBodyBreakdown(tag string, body []byte) {
 
 	toolsBytes := len(parts["tools"])
 	messagesBytes := len(parts["messages"])
-	log.Printf("[OpenAI:%s] body %d KB = messages %d KB (%d 条) + tools %d KB (%d 个) + 其他 %d KB",
+	log.Printf("[OpenAI:%s] body %d KB = messages %d KB (%d msgs) + tools %d KB (%d tools) + other %d KB",
 		tag,
 		len(body)/1024,
 		messagesBytes/1024, len(messages),

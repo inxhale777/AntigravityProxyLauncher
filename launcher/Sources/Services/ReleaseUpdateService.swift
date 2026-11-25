@@ -12,15 +12,15 @@ extension ReleaseUpdateError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidURL:
-            return "更新源地址无效，仅支持 http/https"
+            return "Invalid update source URL: only http/https is supported"
         case .untrustedSource(let host):
-            return "更新源不在授信域名内: \(host)"
+            return "Update source host is not trusted: \(host)"
         case .fetchFailed(let reason):
-            return "检查更新失败: \(reason)"
+            return "Update check failed: \(reason)"
         case .rateLimited:
-            return "GitHub API 请求频率超限，请稍后再试或在设置中配置 GitHub Token"
+            return "GitHub API rate limit exceeded. Try again later or set a GitHub token in Settings"
         case .decodeFailed:
-            return "更新信息解析失败"
+            return "Could not parse the update information"
         }
     }
 }
@@ -189,7 +189,7 @@ struct ReleaseUpdateService {
         let (data, response) = try await URLSession.shared.data(for: request)
 
         guard let http = response as? HTTPURLResponse else {
-            throw ReleaseUpdateError.fetchFailed("无效的响应")
+            throw ReleaseUpdateError.fetchFailed("Invalid response")
         }
 
         // Handle 304 Not Modified (conditional request)

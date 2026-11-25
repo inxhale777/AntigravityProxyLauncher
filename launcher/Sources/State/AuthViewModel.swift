@@ -75,14 +75,14 @@ final class AuthViewModel: ObservableObject {
         guard !isBusy else { return }
 
         isBusy = true
-        statusMessage = "正在启动 Google 登录..."
+        statusMessage = "Starting Google sign-in..."
         errorMessage = nil
 
         Task {
             do {
                 _ = try await oauthService.login()
                 // authState / loginFlowInfo 变化已通过 Combine 自动同步
-                statusMessage = "登录成功"
+                statusMessage = "Signed in"
             } catch {
                 errorMessage = error.localizedDescription
                 statusMessage = nil
@@ -93,7 +93,7 @@ final class AuthViewModel: ObservableObject {
 
     func cancelLogin() {
         oauthService.cancelLogin()
-        statusMessage = "已取消登录"
+        statusMessage = "Sign-in cancelled"
         errorMessage = nil
         isBusy = false
         // loginFlowInfo 变化已通过 Combine 自动同步
@@ -106,7 +106,7 @@ final class AuthViewModel: ObservableObject {
         Task {
             do {
                 try oauthService.logout()
-                statusMessage = "已登出"
+                statusMessage = "Signed out"
                 errorMessage = nil
             } catch {
                 errorMessage = error.localizedDescription
@@ -121,13 +121,13 @@ final class AuthViewModel: ObservableObject {
         guard !isBusy else { return }
 
         isBusy = true
-        statusMessage = "正在校验 Token..."
+        statusMessage = "Validating the token..."
         errorMessage = nil
 
         Task {
             do {
                 _ = try await oauthService.getValidAccessToken()
-                statusMessage = "Token 有效"
+                statusMessage = "Token valid"
                 errorMessage = nil
             } catch {
                 errorMessage = error.localizedDescription
@@ -146,7 +146,7 @@ final class AuthViewModel: ObservableObject {
         Task {
             do {
                 try oauthService.setActiveAccount(accountId)
-                statusMessage = "已切换账户"
+                statusMessage = "Account switched"
                 syncAccounts() // 切换账户后手动刷新（不触发 authState 变化）
             } catch {
                 errorMessage = error.localizedDescription
@@ -164,25 +164,25 @@ final class AuthViewModel: ObservableObject {
 
     var authStateText: String {
         switch authState {
-        case .notAuthenticated: return "未登录"
-        case .authenticating:   return "登录中"
-        case .authenticated:    return "已登录"
-        case .tokenExpired:     return "Token 过期"
-        case .refreshing:       return "刷新中"
-        case .error(let msg):   return "错误: \(msg)"
+        case .notAuthenticated: return "Not signed in"
+        case .authenticating:   return "Signing in"
+        case .authenticated:    return "Signed in"
+        case .tokenExpired:     return "Token expired"
+        case .refreshing:       return "Refreshing"
+        case .error(let msg):   return "Error: \(msg)"
         }
     }
 
     var loginFlowText: String {
         switch loginFlowState {
-        case .idle:                 return "空闲"
-        case .preparing:            return "准备中"
-        case .openingBrowser:       return "打开浏览器"
-        case .waitingAuthorization: return "等待授权"
-        case .exchangingToken:      return "交换 Token"
-        case .success:              return "成功"
-        case .error:                return "失败"
-        case .cancelled:            return "已取消"
+        case .idle:                 return "Idle"
+        case .preparing:            return "Preparing"
+        case .openingBrowser:       return "Open browser"
+        case .waitingAuthorization: return "Waiting for authorization"
+        case .exchangingToken:      return "Exchange token"
+        case .success:              return "Success"
+        case .error:                return "Failed"
+        case .cancelled:            return "Cancelled"
         }
     }
 }

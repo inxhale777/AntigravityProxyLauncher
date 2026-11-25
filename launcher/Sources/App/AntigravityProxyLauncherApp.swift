@@ -25,18 +25,18 @@ struct AntigravityProxyLauncherApp: App {
             print(LauncherCLICommandParser.helpText)
             Darwin.exit(0)
         case .unknown(let arg):
-            print("未知参数: \(arg)")
+            print("Unknown argument: \(arg)")
             print(LauncherCLICommandParser.helpText)
             Darwin.exit(2)
         case .none:
             let bundleIdentifier = Bundle.main.bundleIdentifier?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
             if bundleIdentifier.isEmpty {
 #if DEBUG
-                print("当前进程缺少主 Bundle Identifier，已切换为开发模式继续启动 GUI。")
+                print("This process has no main bundle identifier; continuing in development mode.")
                 LauncherLogger.warn("Missing bundle identifier in DEBUG run. Continue GUI bootstrap for local development.")
 #else
-                print("当前进程缺少主 Bundle Identifier，已跳过 GUI 启动。")
-                print("请使用 .app 方式启动 GUI，或改用 CLI 诊断命令。")
+                print("This process has no main bundle identifier; GUI launch skipped.")
+                print("Start the GUI from the .app bundle, or use the CLI diagnostic commands.")
                 print(LauncherCLICommandParser.helpText)
                 Darwin.exit(2)
 #endif
@@ -56,7 +56,7 @@ struct AntigravityProxyLauncherApp: App {
             break
         }
 
-        LauncherLogger.info("Launcher started in GUI mode. If no terminal output appears, check the app window in Dock/桌面。")
+        LauncherLogger.info("Launcher started in GUI mode. If no terminal output appears, check the app window in the Dock or on the Desktop.")
         ProxyManager.shared.startProxy()
     }
 
@@ -97,21 +97,21 @@ struct AntigravityProxyLauncherApp: App {
                             Button {
                                 appState.stopSpecificApp(app)
                             } label: {
-                                Label("关闭", systemImage: "stop.circle")
+                                Label("Close", systemImage: "stop.circle")
                             }
                         }
                         if status.isPatched && !status.isRunning {
                             Button {
                                 appState.launchSpecificApp(app)
                             } label: {
-                                Label("启动", systemImage: "play.circle")
+                                Label("Launch", systemImage: "play.circle")
                             }
                         }
                         if status.isInstalled {
                             Button {
                                 appState.patchSpecificApp(app)
                             } label: {
-                                Label("修复", systemImage: "wrench")
+                                Label("Repair", systemImage: "wrench")
                             }
                         }
                     } label: {
@@ -143,7 +143,7 @@ struct AntigravityProxyLauncherApp: App {
 
             Divider()
 
-            Button("显示主窗口") {
+            Button("Show main window") {
                 NSApplication.shared.activate(ignoringOtherApps: true)
                 if let window = NSApplication.shared.windows.first(where: { $0.title.contains("Antigravity") }) {
                     window.makeKeyAndOrderFront(nil)
@@ -152,7 +152,7 @@ struct AntigravityProxyLauncherApp: App {
 
             Divider()
 
-            Button("退出 Launcher") {
+            Button("Quit Launcher") {
                 NSApplication.shared.terminate(nil)
             }
         }

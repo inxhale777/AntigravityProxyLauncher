@@ -28,17 +28,17 @@ struct ActivationView: View {
                     }
                 }
                 
-                Text("请关注公众号，发送关键词")
+                Text("Follow the author's WeChat account and send the keyword")
                     .foregroundColor(.secondary)
-                    + Text(" 激活码 ")
+                    + Text(" Activation code ")
                         .foregroundColor(.blue)
                         .fontWeight(.medium)
-                    + Text("获取激活码")
+                    + Text("Get an activation code")
                         .foregroundColor(.secondary)
             }
             
             VStack(spacing: 16) {
-                TextField("例如：AG-XXXX-XXXX", text: $code)
+                TextField("e.g. AG-XXXX-XXXX", text: $code)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .font(.system(.body, design: .monospaced))
                     .multilineTextAlignment(.center)
@@ -54,7 +54,7 @@ struct ActivationView: View {
                 }
                 
                 Button(action: activate) {
-                    Text(isLoading ? "验证中..." : "激活")
+                    Text(isLoading ? "Verifying..." : "Activate")
                         .fontWeight(.medium)
                         .frame(width: 280, height: 32)
                 }
@@ -63,7 +63,7 @@ struct ActivationView: View {
                 .disabled(code.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || isLoading)
             }
             
-            Text("激活后本机无需再次输入")
+            Text("You only need to do this once on this Mac")
                 .font(.caption)
                 .foregroundColor(.secondary)
         }

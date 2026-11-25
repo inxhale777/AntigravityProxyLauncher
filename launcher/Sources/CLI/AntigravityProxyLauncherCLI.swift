@@ -23,7 +23,7 @@ struct AntigravityProxyLauncherCLI {
             print(LauncherCLICommandParser.helpText)
             Darwin.exit(0)
         case .unknown(let arg):
-            print("未知参数: \(arg)")
+            print("Unknown argument: \(arg)")
             print(LauncherCLICommandParser.helpText)
             Darwin.exit(2)
         case .none:

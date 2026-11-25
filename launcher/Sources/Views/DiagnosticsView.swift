@@ -8,8 +8,8 @@ private enum FileReferenceSection: CaseIterable {
 
     var title: String {
         switch self {
-        case .logs: return "日志文件"
-        case .configs: return "配置文件"
+        case .logs: return "Log files"
+        case .configs: return "Configuration file"
         }
     }
 
@@ -38,21 +38,21 @@ private func buildFileEntries() -> [FileReferenceEntry] {
     // ── 日志文件（全局） ──
     var entries: [FileReferenceEntry] = [
         FileReferenceEntry(
-            label: "Dylib 运行日志",
+            label: "Dylib runtime log",
             path: home.appendingPathComponent(".config/antigravity").path,
             iconName: "doc.text",
             section: .logs,
             usesDirectoryForReveal: true
         ),
         FileReferenceEntry(
-            label: "Go 代理日志",
+            label: "Go proxy log",
             path: home.appendingPathComponent(".config/antigravity/mitm_proxy.log").path,
             iconName: "terminal",
             section: .logs,
             usesDirectoryForReveal: false
         ),
         FileReferenceEntry(
-            label: "修复流程日志",
+            label: "Repair flow log",
             path: FileSystemPaths.patchLogFile.path,
             iconName: "wrench.and.screwdriver",
             section: .logs,
@@ -63,21 +63,21 @@ private func buildFileEntries() -> [FileReferenceEntry] {
 
     // ── 配置文件（全局） ──
     entries.append(FileReferenceEntry(
-        label: "偏好设置",
+        label: "Preferences",
         path: FileSystemPaths.settingsFile.path,
         iconName: "gearshape",
         section: .configs,
         usesDirectoryForReveal: false
     ))
     entries.append(FileReferenceEntry(
-        label: "模型映射配置",
+        label: "Model mapping configuration",
         path: FileSystemPaths.userModelRoutingConfigFile.path,
         iconName: "arrow.triangle.branch",
         section: .configs,
         usesDirectoryForReveal: false
     ))
     entries.append(FileReferenceEntry(
-        label: "MITM CA 证书",
+        label: "MITM CA certificate",
         path: home.appendingPathComponent(".config/antigravity/goproxy_ca.pem").path,
         iconName: "lock.shield",
         section: .configs,
@@ -86,7 +86,7 @@ private func buildFileEntries() -> [FileReferenceEntry] {
 
     // ── 配置文件（全局代理配置） ──
     entries.append(FileReferenceEntry(
-        label: "代理配置",
+        label: "Proxy configuration",
         path: FileSystemPaths.userProxyConfigFile.path,
         iconName: "slider.horizontal.3",
         section: .configs,
@@ -111,11 +111,11 @@ struct DiagnosticsView: View {
                         Image(systemName: "folder.badge.questionmark")
                             .font(.title2)
                             .foregroundStyle(.blue)
-                        Text("系统诊断")
+                        Text("System Diagnostics")
                             .font(.title2)
                             .bold()
                     }
-                    Text("查看平台所有日志与配置文件的存储路径，便于问题排查与手动定位。")
+                    Text("Shows where the platform keeps its logs and configuration files, for troubleshooting.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                         .padding(.leading, 32)
@@ -212,13 +212,13 @@ private struct FileReferenceRow: View {
                         Image(systemName: justCopied ? "checkmark" : "doc.on.doc")
                     }
                     .iconButtonStyle()
-                    .help(justCopied ? "已复制" : "复制路径")
+                    .help(justCopied ? "Copied" : "Copy path")
 
                     Button(action: revealInFinder) {
                         Image(systemName: "arrow.right.to.line.compact")
                     }
                     .iconButtonStyle()
-                    .help("在 Finder 中显示")
+                    .help("Show in Finder")
                 }
                 .transition(.opacity)
             }

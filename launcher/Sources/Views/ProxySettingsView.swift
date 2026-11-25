@@ -46,11 +46,11 @@ struct ProxySettingsView: View {
                         Image(systemName: "slider.horizontal.3")
                             .font(.title2)
                             .foregroundStyle(.blue)
-                        Text("代理设置")
+                        Text("Proxy Settings")
                             .font(.title2)
                             .bold()
                     }
-                    Text("配置上游 SOCKS5/HTTP 代理节点，所有目标应用共享此配置。")
+                    Text("Configure the upstream SOCKS5/HTTP proxy node. All target apps share this configuration.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                         .padding(.leading, 32)
@@ -116,26 +116,26 @@ struct ProxySettingsView: View {
     private var proxySettingsView: some View {
         VStack(alignment: .leading, spacing: 8) {
             if isEditing {
-                settingRow(label: "类型", width: 72) {
+                settingRow(label: "Type", width: 72) {
                     TextField("SOCKS5/HTTP", text: $appState.proxyConfigDraft.proxy.type)
                         .textFieldStyle(.roundedBorder)
                         .font(.system(size: 12, design: .monospaced))
                 }
-                settingRow(label: "主机", width: 72) {
+                settingRow(label: "Host", width: 72) {
                     TextField("127.0.0.1", text: $appState.proxyConfigDraft.proxy.host)
                         .textFieldStyle(.roundedBorder)
                         .font(.system(size: 12, design: .monospaced))
                 }
-                settingRow(label: "端口", width: 72) {
+                settingRow(label: "Port", width: 72) {
                     TextField("7897", text: portText)
                         .textFieldStyle(.roundedBorder)
                         .font(.system(size: 12, design: .monospaced))
                         .frame(maxWidth: 100)
                 }
             } else {
-                readOnlyRow(label: "类型", value: appState.proxyConfigDraft.proxy.type)
-                readOnlyRow(label: "主机", value: appState.proxyConfigDraft.proxy.host)
-                readOnlyRow(label: "端口", value: String(appState.proxyConfigDraft.proxy.port))
+                readOnlyRow(label: "Type", value: appState.proxyConfigDraft.proxy.type)
+                readOnlyRow(label: "Host", value: appState.proxyConfigDraft.proxy.host)
+                readOnlyRow(label: "Port", value: String(appState.proxyConfigDraft.proxy.port))
             }
         }
     }
@@ -145,7 +145,7 @@ struct ProxySettingsView: View {
     private var featuresView: some View {
         VStack(alignment: .leading, spacing: 8) {
             if isEditing {
-                settingRow(label: "日志级别", width: 72) {
+                settingRow(label: "Log level", width: 72) {
                     Picker("", selection: $appState.proxyConfigDraft.logLevel) {
                         Text("error").tag("error")
                         Text("warn").tag("warn")
@@ -155,7 +155,7 @@ struct ProxySettingsView: View {
                     .pickerStyle(.segmented)
                     .labelsHidden()
                 }
-                settingRow(label: "模型映射", width: 72) {
+                settingRow(label: "Model mapping", width: 72) {
                     Toggle("", isOn: Binding(
                         get: { appState.proxyConfigDraft.mitm?.modelRoutingEnabled ?? false },
                         set: { newValue in
@@ -182,14 +182,14 @@ struct ProxySettingsView: View {
                 }
             } else {
                 // 模型映射开关直接暴露:切换即保存,无需进入编辑模式
-                settingRow(label: "模型映射", width: 72) {
+                settingRow(label: "Model mapping", width: 72) {
                     Toggle("", isOn: modelRoutingToggleBinding)
                         .toggleStyle(.switch)
                         .labelsHidden()
-                        .help("切换后会自动重启本地网关并生效")
+                        .help("The local gateway restarts automatically after you switch")
                 }
-                readOnlyRow(label: "日志级别", value: appState.proxyConfigDraft.logLevel)
-                readOnlyRow(label: "FakeIP", value: appState.proxyConfigDraft.fakeIP.enabled ? "开 · \(appState.proxyConfigDraft.fakeIP.cidr)" : "关")
+                readOnlyRow(label: "Log level", value: appState.proxyConfigDraft.logLevel)
+                readOnlyRow(label: "FakeIP", value: appState.proxyConfigDraft.fakeIP.enabled ? "On · \(appState.proxyConfigDraft.fakeIP.cidr)" : "Off")
             }
         }
     }
@@ -222,7 +222,7 @@ struct ProxySettingsView: View {
                 Image(systemName: fileExists ? "checkmark.circle.fill" : "xmark.circle.fill")
                     .font(.system(size: 11))
                     .foregroundStyle(fileExists ? .green : .red)
-                Text(fileExists ? "配置文件存在" : "配置文件不存在")
+                Text(fileExists ? "Configuration file present" : "Configuration file missing")
                     .font(.system(size: 12))
                     .foregroundStyle(fileExists ? .green : .red)
             }
@@ -265,7 +265,7 @@ struct ProxySettingsView: View {
         Button(action: { checkConnectivity() }) {
             ButtonLabel(
                 icon: isChecking ? "hourglass" : "antenna.radiowaves.left.and.right",
-                text: isChecking ? "检测中" : "检测"
+                text: isChecking ? "Detecting" : "Detect"
             )
         }
         .primaryActionStyle()
@@ -274,7 +274,7 @@ struct ProxySettingsView: View {
 
     private var editButton: some View {
         Button(action: { isEditing = true }) {
-            ButtonLabel(icon: "pencil", text: "编辑")
+            ButtonLabel(icon: "pencil", text: "Edit")
         }
         .secondaryActionStyle()
     }
@@ -284,7 +284,7 @@ struct ProxySettingsView: View {
             appState.loadProxyConfig()
             isEditing = false
         }) {
-            ButtonLabel(icon: "xmark", text: "取消")
+            ButtonLabel(icon: "xmark", text: "Cancel")
         }
         .secondaryActionStyle()
     }
@@ -294,7 +294,7 @@ struct ProxySettingsView: View {
             appState.saveProxyConfig()
             isEditing = false
         }) {
-            ButtonLabel(icon: "square.and.arrow.down", text: "保存")
+            ButtonLabel(icon: "square.and.arrow.down", text: "Save")
         }
         .primaryActionStyle()
     }
@@ -309,8 +309,8 @@ struct ProxySettingsView: View {
     }
 
     private var connectivityText: String {
-        guard let r = currentConnectivity else { return "未检测" }
-        return r.isOK ? "已连接" : "异常"
+        guard let r = currentConnectivity else { return "Not checked" }
+        return r.isOK ? "Connected" : "Error"
     }
 
     private var connectivityTextColor: Color {

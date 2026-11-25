@@ -1,11 +1,11 @@
 import Foundation
 
 enum LaunchWorkflowStep: String, CaseIterable, Identifiable {
-    case detect = "检测目标应用"
-    case migration = "迁移历史数据"
-    case patch = "修复应用包"
-    case verify = "验证修复结果"
-    case launch = "启动修复版"
+    case detect = "Detect target app"
+    case migration = "Migrate existing data"
+    case patch = "Repair app bundle"
+    case verify = "Verify repair result"
+    case launch = "Launch patched app"
 
     var id: String { rawValue }
 }

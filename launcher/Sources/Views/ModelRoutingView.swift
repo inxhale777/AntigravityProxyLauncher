@@ -43,14 +43,14 @@ struct ModelRoutingView: View {
             Image(systemName: "arrow.triangle.branch")
                 .font(.system(size: 40))
                 .foregroundStyle(.secondary.opacity(0.4))
-            Text("模型映射未启用")
+            Text("Model mapping is off")
                 .font(.title3)
                 .foregroundStyle(.secondary)
-            Text("请先在「代理设置」中开启「模型映射」开关，然后再配置映射规则。")
+            Text("Turn on \"Model mapping\" in \"Proxy Settings\" before configuring mapping rules.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
-            Button("前往代理设置") {
+            Button("Open Proxy Settings") {
                 appState.selectedTab = .proxySettings
             }
             .buttonStyle(.bordered)
@@ -68,11 +68,11 @@ struct ModelRoutingView: View {
                 Image(systemName: "arrow.triangle.branch")
                     .font(.title2)
                     .foregroundStyle(.purple)
-                Text("模型映射 (Model Routing)")
+                Text("Model mapping (Model Routing)")
                     .font(.title2)
                     .bold()
             }
-            Text("配置模型转译规则，将目标应用的 AI 接口请求无缝映射到第三方兼容提供商。")
+            Text("Configure model translation rules to map the target app's AI API requests to third-party compatible providers.")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .padding(.leading, 32)
@@ -90,9 +90,9 @@ struct ModelRoutingView: View {
         return CollapsibleCard(
             icon: "arrow.triangle.2.circlepath",
             accentColor: .green,
-            title: "模型路由配置",
-            subtitle: "配置第三方 API 接口厂家及源模型至目标模型的映射规则",
-            badgeText: "\(enabledProvidersCount)/\(totalProvidersCount) 厂家 · \(rulesCount) 规则",
+            title: "Model routing configuration",
+            subtitle: "Configure third-party API providers and the mapping from source to target models",
+            badgeText: "\(enabledProvidersCount)/\(totalProvidersCount) providers · \(rulesCount) rules",
             isExpanded: $isModelRoutingExpanded
         ) {
             VStack(alignment: .leading, spacing: 18) {
@@ -100,9 +100,9 @@ struct ModelRoutingView: View {
                 SubCollapsibleSection(
                     icon: "rectangle.stack.badge.person.crop",
                     accentColor: .green,
-                    title: "接口厂家配置",
-                    description: "勾选启用的目标厂家，并分别设定对应的 API 接入点（Endpoint）和密钥（API Key）。超过两行可向下滚动查看更多。",
-                    badgeText: "\(enabledProvidersCount) 启用",
+                    title: "Provider settings",
+                    description: "Tick the providers you want to enable and set each one's API endpoint and API key. Scroll down if there are more than two rows.",
+                    badgeText: "\(enabledProvidersCount) enabled",
                     isExpanded: $isProvidersExpanded
                 ) {
                     ScrollView(.vertical, showsIndicators: true) {
@@ -125,26 +125,26 @@ struct ModelRoutingView: View {
                 SubCollapsibleSection(
                     icon: "arrow.left.arrow.right",
                     accentColor: .orange,
-                    title: "模型路由映射规则",
-                    description: "配置需要转译的源模型，选择目标服务商和模型。规则存在即生效，删除即停止映射。",
-                    badgeText: "\(rulesCount) 条规则",
+                    title: "Model routing rules",
+                    description: "Set the source models to translate and pick the target provider and model. A rule applies as long as it exists; delete it to stop the mapping.",
+                    badgeText: "\(rulesCount) rules",
                     isExpanded: $isRoutingRulesExpanded
                 ) {
                     VStack(alignment: .leading, spacing: 8) {
                         // Header labels
                         HStack(spacing: 8) {
-                            Text("源模型匹配名称")
+                            Text("Source model name to match")
                                 .font(.caption)
                                 .bold()
                                 .foregroundStyle(.secondary)
                                 .frame(width: 140, alignment: .leading)
                             Spacer().frame(width: 20)
-                            Text("目标服务商")
+                            Text("Target provider")
                                 .font(.caption)
                                 .bold()
                                 .foregroundStyle(.secondary)
                                 .frame(width: 130, alignment: .leading)
-                            Text("映射目标模型")
+                            Text("Target model")
                                 .font(.caption)
                                 .bold()
                                 .foregroundStyle(.secondary)
@@ -171,7 +171,7 @@ struct ModelRoutingView: View {
                             Button(action: {
                                 let newRule = ModelRoutingConfig.RoutingRule(
                                     sourceModelPattern: "",
-                                    sourceDisplayName: "新规则",
+                                    sourceDisplayName: "New rule",
                                     sourceType: "google",
                                     targetProviderID: nil,
                                     targetModel: nil,
@@ -182,7 +182,7 @@ struct ModelRoutingView: View {
                                 HStack(spacing: 6) {
                                     Spacer()
                                     Image(systemName: "plus.circle")
-                                    Text("添加规则")
+                                    Text("Add rule")
                                     Spacer()
                                 }
                                 .font(.system(size: 12, weight: .medium))
@@ -216,9 +216,9 @@ struct ModelRoutingView: View {
         return CollapsibleCard(
             icon: "shuffle",
             accentColor: .purple,
-            title: "LLM Router（关键词路由）",
-            subtitle: "根据请求 Prompt 关键词，智能分流路由至不同目标模型",
-            badgeText: isRouterEnabled ? "已启用 · \(ruleCount) 规则" : "未开启",
+            title: "LLM Router (keyword routing)",
+            subtitle: "Routes requests to different target models by keywords in the prompt",
+            badgeText: isRouterEnabled ? "Enabled · \(ruleCount) rules" : "Off",
             isExpanded: $isLLMRouterExpanded,
             headerTrailing: {
                 Toggle("", isOn: Binding(
@@ -243,7 +243,7 @@ struct ModelRoutingView: View {
                     HStack(spacing: 8) {
                         Image(systemName: "info.circle")
                             .foregroundStyle(.secondary)
-                        Text("在上方「模型路由映射规则」中将目标服务商选择为「LLM Router」后，请求将进入关键词路由子系统。")
+                        Text("Set the target provider to \"LLM Router\" in the model routing rules above and requests go through the keyword routing subsystem.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -254,7 +254,7 @@ struct ModelRoutingView: View {
                     HStack(spacing: 8) {
                         Image(systemName: "exclamationmark.triangle.fill")
                             .foregroundStyle(.orange)
-                        Text("已有规则映射到 LLM Router，但尚未开启此功能开关。开启后将按关键词分流。")
+                        Text("Some rules already map to LLM Router, but this feature is off. Turn it on to route by keyword.")
                             .font(.caption)
                             .foregroundStyle(.orange)
                     }
@@ -265,7 +265,7 @@ struct ModelRoutingView: View {
                     HStack(spacing: 8) {
                         Image(systemName: "checkmark.circle.fill")
                             .foregroundStyle(.purple)
-                        Text("根据请求 Prompt 中的关键词自动匹配并路由至目标模型；未命中时使用下方默认模型。")
+                        Text("Matches keywords in the request prompt and routes to the target model; requests with no match use the default model below.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -274,13 +274,13 @@ struct ModelRoutingView: View {
                 if isRouterEnabled {
                     // Default model section
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("默认模型（未命中关键词时使用）")
+                        Text("Default model (used when no keyword matches)")
                             .font(.caption)
                             .bold()
                             .foregroundStyle(.secondary)
 
                         HStack(spacing: 12) {
-                            Picker("默认厂家", selection: Binding(
+                            Picker("Default provider", selection: Binding(
                                 get: { appState.modelRoutingConfig.llmRouter?.defaultProviderID ?? "" },
                                 set: { newID in
                                     appState.modelRoutingConfig.llmRouter?.defaultProviderID = newID
@@ -292,7 +292,7 @@ struct ModelRoutingView: View {
                                     }
                                 }
                             )) {
-                                Text("选择厂家").tag("")
+                                Text("Select provider").tag("")
                                 ForEach(appState.modelRoutingConfig.providers.filter(\.enabled)) { p in
                                     Text(p.name).tag(p.id)
                                 }
@@ -302,11 +302,11 @@ struct ModelRoutingView: View {
 
                             let defaultPID = appState.modelRoutingConfig.llmRouter?.defaultProviderID ?? ""
                             if let provider = appState.modelRoutingConfig.providers.first(where: { $0.id == defaultPID && $0.enabled }) {
-                                Picker("默认模型", selection: Binding(
+                                Picker("Default model", selection: Binding(
                                     get: { appState.modelRoutingConfig.llmRouter?.defaultModel ?? "" },
                                     set: { appState.modelRoutingConfig.llmRouter?.defaultModel = $0 }
                                 )) {
-                                    Text("选择模型").tag("")
+                                    Text("Select model").tag("")
                                     ForEach(provider.models, id: \.self) { m in
                                         Text(m).tag(m)
                                     }
@@ -331,29 +331,29 @@ struct ModelRoutingView: View {
 
                     // Keyword rules
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("关键词路由规则")
+                        Text("Keyword routing rules")
                             .font(.caption)
                             .bold()
                             .foregroundStyle(.secondary)
 
                         // Header
                         HStack(spacing: 8) {
-                            Text("关键词（逗号分隔）")
+                            Text("Keywords (comma-separated)")
                                 .font(.caption)
                                 .bold()
                                 .foregroundStyle(.secondary)
                                 .frame(width: 200, alignment: .leading)
-                            Text("匹配模式")
+                            Text("Match mode")
                                 .font(.caption)
                                 .bold()
                                 .foregroundStyle(.secondary)
                                 .frame(width: 90, alignment: .leading)
-                            Text("目标厂家")
+                            Text("Target provider")
                                 .font(.caption)
                                 .bold()
                                 .foregroundStyle(.secondary)
                                 .frame(width: 120, alignment: .leading)
-                            Text("目标模型")
+                            Text("Target model")
                                 .font(.caption)
                                 .bold()
                                 .foregroundStyle(.secondary)
@@ -390,7 +390,7 @@ struct ModelRoutingView: View {
                                 HStack(spacing: 6) {
                                     Spacer()
                                     Image(systemName: "plus.circle")
-                                    Text("添加关键词规则")
+                                    Text("Add keyword rule")
                                     Spacer()
                                 }
                                 .font(.system(size: 12, weight: .medium))
@@ -420,9 +420,9 @@ struct ModelRoutingView: View {
             HStack(spacing: 12) {
                 Button(action: {
                     appState.modelRoutingConfig = .default
-                    statusMessage = "已恢复默认映射规则，请点击保存并应用配置。"
+                    statusMessage = "Default mapping rules restored. Click Save to apply."
                 }) {
-                    ButtonLabel(icon: "arrow.counterclockwise", text: "恢复默认")
+                    ButtonLabel(icon: "arrow.counterclockwise", text: "Restore defaults")
                 }
                 .secondaryActionStyle()
 
@@ -430,10 +430,10 @@ struct ModelRoutingView: View {
                     if isRestarting {
                         HStack(spacing: 3) {
                             ProgressView().scaleEffect(0.7).frame(width: 14, height: 14)
-                            Text("重启代理中...").font(.system(size: 11, weight: .bold))
+                            Text("Restarting proxy...").font(.system(size: 11, weight: .bold))
                         }
                     } else {
-                        ButtonLabel(icon: "square.and.arrow.down", text: "保存并应用")
+                        ButtonLabel(icon: "square.and.arrow.down", text: "Save & Apply")
                     }
                 }
                 .primaryActionStyle()
@@ -465,7 +465,7 @@ struct ModelRoutingView: View {
             HStack(spacing: 8) {
                 Image(systemName: "doc.text.fill")
                     .foregroundStyle(.secondary)
-                Text("模型映射配置文件: \(ModelRoutingService().configPath())")
+                Text("Model mapping configuration file: \(ModelRoutingService().configPath())")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .textSelection(.enabled)
@@ -490,7 +490,7 @@ struct ModelRoutingView: View {
         appState.saveCurrentModelRoutingConfig()
 
         if let err = appState.modelRoutingErrorMessage {
-            errorMessage = "保存失败: \(err)"
+            errorMessage = "Save failed: \(err)"
             statusMessage = nil
             return
         }
@@ -503,9 +503,9 @@ struct ModelRoutingView: View {
                 let ok = ProxyManager.shared.healthCheck()
                 isRestarting = false
                 if ok {
-                    statusMessage = "路由规则已保存，代理已重启生效。"
+                    statusMessage = "Routing rules saved. The proxy has been restarted."
                 } else {
-                    errorMessage = "代理重启后健康检查失败，请检查端口 18081。"
+                    errorMessage = "Health check failed after the proxy restart. Check port 18081."
                 }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 4) {
                     statusMessage = nil
@@ -757,7 +757,7 @@ struct ProviderCard: View {
                         Image(systemName: "arrow.up.forward.app")
                     }
                     .iconButtonStyle()
-                    .help("打开 \(provider.name) 官网")
+                    .help("Open \(provider.name) website")
                     .disabled(!provider.enabled)
                 }
                 Spacer()
@@ -769,7 +769,7 @@ struct ProviderCard: View {
             // 表单始终渲染，保持卡片大小一致；关闭时整体置灰且不可编辑
             VStack(spacing: 10) {
                 HStack(spacing: 8) {
-                    Text("接入点")
+                    Text("Endpoint")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .frame(width: 50, alignment: .leading)
@@ -793,7 +793,7 @@ struct ProviderCard: View {
                 }
 
                 HStack(spacing: 8) {
-                    Text("API 路径")
+                    Text("API path")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .frame(width: 50, alignment: .leading)
@@ -816,7 +816,7 @@ struct ProviderCard: View {
                 HStack(spacing: 8) {
                     Text(" ")
                         .frame(width: 50, alignment: .leading)
-                    Toggle("自动同步可用模型", isOn: Binding(
+                    Toggle("Auto-sync available models", isOn: Binding(
                         get: { provider.options["auto_models"] == "true" },
                         set: { newValue in
                             if newValue {
@@ -831,13 +831,13 @@ struct ProviderCard: View {
                     .controlSize(.small)
                     .font(.system(size: 11))
                     .disabled(!provider.enabled)
-                    .help("启动或测试时自动从接口获取最新模型列表")
+                    .help("Fetch the latest model list from the endpoint on launch or test")
                 }
 
                 HStack(spacing: 8) {
                     Text(" ")
                         .frame(width: 50, alignment: .leading)
-                    Toggle("提示词兼容模式", isOn: Binding(
+                    Toggle("Prompt compatibility mode", isOn: Binding(
                         get: { provider.options["sanitize_system_prompt"] == "true" },
                         set: { newValue in
                             if newValue {
@@ -852,7 +852,7 @@ struct ProviderCard: View {
                     .controlSize(.small)
                     .font(.system(size: 11))
                     .disabled(!provider.enabled)
-                    .help("把 system 指令原样移到 user 消息，绕过上游对第三方客户端的指纹校验。CodeBuddy / WorkBuddy 遇到「Illegal API invocation from an unapproved channel」时打开；其他 provider 无需开启")
+                    .help("Moves the system instructions unchanged into a user message to bypass the upstream fingerprint check for third-party clients. Turn on if CodeBuddy / WorkBuddy returns \"Illegal API invocation from an unapproved channel\"; not needed for other providers")
                 }
 
                 // Test connection + fetch models + inline result
@@ -864,15 +864,15 @@ struct ProviderCard: View {
                         if isTesting {
                             HStack(spacing: 3) {
                                 ProgressView().scaleEffect(0.7).frame(width: 14, height: 14)
-                                Text("测试中...").font(.system(size: 11, weight: .bold))
+                                Text("Testing...").font(.system(size: 11, weight: .bold))
                             }
                         } else {
-                            ButtonLabel(icon: "play.circle", text: "测试连接")
+                            ButtonLabel(icon: "play.circle", text: "Test connection")
                         }
                     }
                     .primaryActionStyle()
                     .disabled(!canTest || !provider.enabled || isTesting)
-                    .help("验证 API 连通性并获取可用模型列表")
+                    .help("Check API connectivity and fetch the list of available models")
 
                     if let result = testResult {
                         HStack(spacing: 4) {
@@ -958,7 +958,7 @@ struct ProviderCard: View {
                 await MainActor.run {
                     provider.models = models
                     testOK = true
-                    testResult = "连接成功，已获取 \(models.count) 个模型"
+                    testResult = "Connected, \(models.count) models found"
                     isTesting = false
                 }
             } catch let error as ModelListService.ModelListError {
@@ -977,9 +977,9 @@ struct ProviderCard: View {
                         if result.ok {
                             let modelCount = provider.models.count
                             if modelCount > 0 {
-                                testResult = "连通性正常，已有 \(modelCount) 个预置模型。模型列表接口不可用(404)"
+                                testResult = "Connection works, \(modelCount) preset models available. The model list endpoint is unavailable (404)"
                             } else {
-                                testResult = "连通性正常，但模型列表接口不可用(404)，请手动填写模型名称"
+                                testResult = "Connection works, but the model list endpoint is unavailable (404). Enter the model names manually"
                             }
                         } else {
                             testResult = result.message
@@ -989,14 +989,14 @@ struct ProviderCard: View {
                 } else {
                     await MainActor.run {
                         testOK = false
-                        testResult = "连接失败: \(error.localizedDescription)"
+                        testResult = "Connection failed: \(error.localizedDescription)"
                         isTesting = false
                     }
                 }
             } catch {
                 await MainActor.run {
                     testOK = false
-                    testResult = "连接失败: \(error.localizedDescription)"
+                    testResult = "Connection failed: \(error.localizedDescription)"
                     isTesting = false
                 }
             }
@@ -1038,7 +1038,7 @@ struct RoutingRuleRow: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            Picker("源模型", selection: Binding(
+            Picker("Source model", selection: Binding(
                 get: { rule.sourceModelPattern },
                 set: { newValue in
                     rule.sourceModelPattern = newValue
@@ -1057,7 +1057,7 @@ struct RoutingRuleRow: View {
                 .font(.caption)
                 .frame(width: 20)
 
-            Picker("厂家", selection: Binding(
+            Picker("Provider", selection: Binding(
                 get: {
                     if let pid = rule.targetProviderID,
                        let p = allProviders.first(where: { $0.id == pid }),
@@ -1076,7 +1076,7 @@ struct RoutingRuleRow: View {
                     }
                 }
             )) {
-                Text("选择厂家").tag("")
+                Text("Select provider").tag("")
                 ForEach(allProviders.filter(\.enabled)) { p in
                     Text(p.name).tag(p.id)
                 }
@@ -1087,17 +1087,17 @@ struct RoutingRuleRow: View {
             .frame(width: 130)
 
             if rule.targetProviderID == LLMRouterProviderID {
-                Text("关键词路由")
+                Text("Keyword routing")
                     .font(.caption)
                     .foregroundStyle(.purple)
                     .frame(width: 170)
             } else if let pid = rule.targetProviderID,
                let provider = allProviders.first(where: { $0.id == pid && $0.enabled }) {
-                Picker("模型", selection: Binding(
+                Picker("Model", selection: Binding(
                     get: { rule.targetModel ?? "" },
                     set: { rule.targetModel = $0.isEmpty ? nil : $0 }
                 )) {
-                    Text("选择模型").tag("")
+                    Text("Select model").tag("")
                     ForEach(provider.models, id: \.self) { m in
                         Text(m).tag(m)
                     }
@@ -1112,7 +1112,7 @@ struct RoutingRuleRow: View {
                 Image(systemName: "xmark.circle.fill")
             }
             .iconButtonStyle()
-            .help("删除此规则")
+            .help("Delete this rule")
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.vertical, 4)
@@ -1131,7 +1131,7 @@ struct LLMRouterRuleRow: View {
     var body: some View {
         HStack(spacing: 8) {
             // Keywords input
-            TextField("前端,React,Vue", text: $keywordsText)
+            TextField("frontend,React,Vue", text: $keywordsText)
                 .textFieldStyle(.roundedBorder)
                 .font(.system(.caption, design: .monospaced))
                 .frame(width: 200)
@@ -1143,29 +1143,29 @@ struct LLMRouterRuleRow: View {
                 }
 
             // Match mode
-            Picker("匹配模式", selection: $rule.matchMode) {
-                Text("任一").tag("any")
-                Text("全部").tag("all")
+            Picker("Match mode", selection: $rule.matchMode) {
+                Text("Any").tag("any")
+                Text("All").tag("all")
             }
             .labelsHidden()
             .frame(width: 90)
 
             // Target provider
-            Picker("厂家", selection: $rule.targetProviderID) {
-                Text("选择").tag("")
+            Picker("Provider", selection: $rule.targetProviderID) {
+                Text("Select").tag("")
                 ForEach(allProviders.filter(\.enabled)) { p in
                     Text(p.name).tag(p.id)
                 }
                 Divider()
-                Text("Gemini（内置）").tag(GeminiBuiltinProviderID)
+                Text("Gemini (built-in)").tag(GeminiBuiltinProviderID)
             }
             .labelsHidden()
             .frame(width: 120)
 
             // Target model
             if rule.targetProviderID == GeminiBuiltinProviderID {
-                Picker("模型", selection: $rule.targetModel) {
-                    Text("选择").tag("")
+                Picker("Model", selection: $rule.targetModel) {
+                    Text("Select").tag("")
                     ForEach(GeminiBuiltinModels) { m in
                         Text(m.displayName).tag(m.id)
                     }
@@ -1173,8 +1173,8 @@ struct LLMRouterRuleRow: View {
                 .labelsHidden()
                 .frame(width: 160)
             } else if let provider = allProviders.first(where: { $0.id == rule.targetProviderID && $0.enabled }) {
-                Picker("模型", selection: $rule.targetModel) {
-                    Text("选择").tag("")
+                Picker("Model", selection: $rule.targetModel) {
+                    Text("Select").tag("")
                     ForEach(provider.models, id: \.self) { m in
                         Text(m).tag(m)
                     }
@@ -1189,7 +1189,7 @@ struct LLMRouterRuleRow: View {
                 Image(systemName: "xmark.circle.fill")
             }
             .iconButtonStyle()
-            .help("删除此规则")
+            .help("Delete this rule")
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.vertical, 3)

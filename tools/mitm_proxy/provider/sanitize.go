@@ -92,7 +92,7 @@ func sanitizeSystemPrompt(rawBody []byte, cfg ProviderConfig) []byte {
 
 	var firstRole string
 	if err := json.Unmarshal(messages[0]["role"], &firstRole); err != nil || !isInstructionRole(firstRole) {
-		log.Printf("[OpenAI:%s] sanitize: 跳过，首条消息 role=%q 不是 system/developer", cfg.ID, firstRole)
+		log.Printf("[OpenAI:%s] sanitize: skipped, first message role=%q is not system/developer", cfg.ID, firstRole)
 		return rawBody
 	}
 
@@ -114,7 +114,7 @@ func sanitizeSystemPrompt(rawBody []byte, cfg ProviderConfig) []byte {
 	}
 
 	if leading == 0 {
-		log.Printf("[OpenAI:%s] sanitize: 跳过，role=%q 的 content 不是纯文本（多模态/结构化）", cfg.ID, firstRole)
+		log.Printf("[OpenAI:%s] sanitize: skipped, content of role=%q is not plain text (multimodal/structured)", cfg.ID, firstRole)
 		return rawBody
 	}
 
@@ -154,7 +154,7 @@ func sanitizeSystemPrompt(rawBody []byte, cfg ProviderConfig) []byte {
 	for _, instruction := range instructions {
 		chars += len(instruction)
 	}
-	log.Printf("[OpenAI:%s] sanitize: %s prompt (%d 字符, %d 条) 已移入 user 消息",
+	log.Printf("[OpenAI:%s] sanitize: %s prompt (%d chars, %d messages) moved into a user message",
 		cfg.ID, firstRole, chars, leading)
 	return out
 }

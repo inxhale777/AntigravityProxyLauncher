@@ -20,23 +20,23 @@ enum PatchVerificationError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .patchedAppMissing(let path):
-            return "验证失败: patched app 不存在 -> \(path)"
+            return "Verification failed: patched app missing -> \(path)"
         case .infoPlistMissing(let path):
-            return "验证失败: Info.plist 不存在 -> \(path)"
+            return "Verification failed: Info.plist missing -> \(path)"
         case .executableMissing(let path):
-            return "验证失败: 主执行文件不存在 -> \(path)"
+            return "Verification failed: main executable missing -> \(path)"
         case .dylibMissing(let path):
-            return "验证失败: dylib 不存在 -> \(path)"
+            return "Verification failed: dylib missing -> \(path)"
         case .configMissing(let path):
-            return "验证失败: 配置文件不存在 -> \(path)"
+            return "Verification failed: configuration file missing -> \(path)"
         case .invalidLSEnvironment:
-            return "验证失败: LSEnvironment 缺失或内容不正确"
+            return "Verification failed: LSEnvironment is missing or incorrect"
         case .invalidCLIWrapper(let path):
-            return "验证失败: CLI wrapper 脚本无效 -> \(path)"
+            return "Verification failed: invalid CLI wrapper script -> \(path)"
         case .codeSignVerifyFailed(let detail):
             let stdout = detail.stdout.trimmingCharacters(in: .whitespacesAndNewlines)
             let stderr = detail.stderr.trimmingCharacters(in: .whitespacesAndNewlines)
-            return "验证失败: codesign --verify 未通过\ncommand: \(detail.command)\nexit: \(detail.exitCode)\nstdout: \(stdout)\nstderr: \(stderr)"
+            return "Verification failed: codesign --verify did not pass\ncommand: \(detail.command)\nexit: \(detail.exitCode)\nstdout: \(stdout)\nstderr: \(stderr)"
         }
     }
 }

@@ -45,7 +45,7 @@ Usage:
     \(executableName) --help
 
 Legacy SwiftPM mode:
-    # 非 .app 进程不要无参数启动（缺少 .app bundle 元数据）
+    # Do not start non-.app builds without arguments (no .app bundle metadata)
   swift run AntigravityProxyLauncher -- --doctor
   swift run AntigravityProxyLauncher -- --export-diagnostics
   swift run AntigravityProxyLauncher -- --verify-patched

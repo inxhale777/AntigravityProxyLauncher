@@ -16,12 +16,12 @@ struct SettingsView: View {
                         Image(systemName: "gearshape.fill")
                             .font(.title2)
                             .foregroundStyle(.gray)
-                        Text("偏好设置")
+                        Text("Preferences")
                             .font(.title2)
                             .bold()
                     }
 
-                    Text("控制底层修复流程行为、自恢复策略与调度参数。")
+                    Text("Controls how the repair flow behaves, its self-recovery policy and scheduling.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                         .padding(.leading, 32)
@@ -33,15 +33,15 @@ struct SettingsView: View {
                         HStack {
                             Image(systemName: "dock.rectangle")
                                 .foregroundStyle(.teal)
-                            Text("外观")
+                            Text("Appearance")
                                 .font(.headline)
                         }
                         Divider()
 
-                        Toggle("隐藏 Dock 图标（仅保留菜单栏图标）", isOn: $appState.settingsDraft.hideDockIcon)
+                        Toggle("Hide the Dock icon (menu bar icon only)", isOn: $appState.settingsDraft.hideDockIcon)
                             .toggleStyle(.switch)
 
-                        Text("说明：隐藏后需重启应用生效，应用仅显示在菜单栏中。")
+                        Text("Note: hiding takes effect after you restart the app, which then appears only in the menu bar.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -58,7 +58,7 @@ struct SettingsView: View {
                         HStack {
                             Image(systemName: "person.badge.key")
                                 .foregroundStyle(.mint)
-                            Text("Google OAuth 登录")
+                            Text("Sign in with Google OAuth")
                                 .font(.headline)
 
                             Spacer()
@@ -74,7 +74,7 @@ struct SettingsView: View {
                             HStack(spacing: 8) {
                                 Image(systemName: "person.slash")
                                     .foregroundStyle(.secondary)
-                                Text("当前状态：未登录")
+                                Text("Status: not signed in")
                                     .font(.subheadline)
                                     .foregroundStyle(.secondary)
                             }
@@ -82,12 +82,12 @@ struct SettingsView: View {
                             HStack(spacing: 8) {
                                 Image(systemName: "person.crop.circle.badge.checkmark")
                                     .foregroundStyle(.green)
-                                Text("当前状态：已登录 \(authViewModel.accounts.count) 个账户")
+                                Text("Status: \(authViewModel.accounts.count) account(s) signed in")
                                     .font(.subheadline)
                                     .foregroundStyle(.green)
 
                                 if let active = authViewModel.activeAccount {
-                                    Text("（活跃：\(active.email)）")
+                                    Text("(active: \(active.email))")
                                         .font(.caption)
                                         .foregroundStyle(.secondary)
                                 }
@@ -97,7 +97,7 @@ struct SettingsView: View {
                         HStack {
                             Text("Client ID")
                                 .frame(width: 100, alignment: .leading)
-                            TextField("填写 Google OAuth Client ID", text: $appState.settingsDraft.googleOAuthClientID)
+                            TextField("Enter the Google OAuth Client ID", text: $appState.settingsDraft.googleOAuthClientID)
                                 .textFieldStyle(.roundedBorder)
                         }
 
@@ -107,15 +107,15 @@ struct SettingsView: View {
 
                             Group {
                                 if revealGoogleClientSecret {
-                                    TextField("填写 Google OAuth Client Secret", text: $appState.settingsDraft.googleOAuthClientSecret)
+                                    TextField("Enter the Google OAuth Client Secret", text: $appState.settingsDraft.googleOAuthClientSecret)
                                 } else {
-                                    SecureField("填写 Google OAuth Client Secret", text: $appState.settingsDraft.googleOAuthClientSecret)
+                                    SecureField("Enter the Google OAuth Client Secret", text: $appState.settingsDraft.googleOAuthClientSecret)
                                 }
                             }
                                 .textFieldStyle(.roundedBorder)
 
                             Button(action: { revealGoogleClientSecret.toggle() }) {
-                                ButtonLabel(icon: revealGoogleClientSecret ? "eye.slash" : "eye", text: revealGoogleClientSecret ? "隐藏" : "显示")
+                                ButtonLabel(icon: revealGoogleClientSecret ? "eye.slash" : "eye", text: revealGoogleClientSecret ? "Hide" : "Show")
                             }
                             .secondaryActionStyle()
                         }
@@ -123,7 +123,7 @@ struct SettingsView: View {
                         // 凭据验证按钮
                         HStack(spacing: 10) {
                             Button(action: testOAuthCredentials) {
-                                ButtonLabel(icon: isTestingCredentials ? "hourglass" : "checkmark.shield", text: isTestingCredentials ? "验证中..." : "测试凭据有效性")
+                                ButtonLabel(icon: isTestingCredentials ? "hourglass" : "checkmark.shield", text: isTestingCredentials ? "Verifying..." : "Test credentials")
                             }
                             .secondaryActionStyle()
                             .disabled(isTestingCredentials)
@@ -136,11 +136,11 @@ struct SettingsView: View {
                             }
                         }
 
-                        Text("说明：若同时设置了环境变量 AG_GOOGLE_CLIENT_ID / AG_GOOGLE_CLIENT_SECRET，环境变量优先。")
+                        Text("Note: if the AG_GOOGLE_CLIENT_ID / AG_GOOGLE_CLIENT_SECRET environment variables are set, they take precedence.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
 
-                        Text("点击底部「保存并应用」后凭据即生效。")
+                        Text("The credentials take effect after you click Save & Apply at the bottom.")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -156,14 +156,14 @@ struct SettingsView: View {
                         HStack {
                             Image(systemName: "arrow.down.circle")
                                 .foregroundStyle(.purple)
-                            Text("Launcher 更新提醒")
+                            Text("Launcher update available")
                                 .font(.headline)
                         }
 
                         Divider()
 
                         HStack {
-                            Text("当前版本")
+                            Text("Current version")
                                 .frame(width: 100, alignment: .leading)
                             Text(appState.launcherVersionText)
                                 .font(.subheadline)
@@ -171,16 +171,16 @@ struct SettingsView: View {
                         }
 
                         HStack {
-                            Text("更新来源")
+                            Text("Update source")
                                 .frame(width: 100, alignment: .leading)
-                            TextField("GitHub 仓库地址，如 OpsinTech/AntigravityProxyLauncher", text: $appState.settingsDraft.releaseFeedURL)
+                            TextField("GitHub repository, e.g. OpsinTech/AntigravityProxyLauncher", text: $appState.settingsDraft.releaseFeedURL)
                                 .textFieldStyle(.roundedBorder)
                         }
 
                         HStack {
-                            Text("授信域名")
+                            Text("Trusted hosts")
                                 .frame(width: 100, alignment: .leading)
-                            TextField("仅自建 feed 时需要，逗号分隔", text: $appState.settingsDraft.releaseFeedTrustedHosts)
+                            TextField("Only for a self-hosted feed; comma-separated", text: $appState.settingsDraft.releaseFeedTrustedHosts)
                                 .textFieldStyle(.roundedBorder)
                         }
 
@@ -190,37 +190,37 @@ struct SettingsView: View {
 
                             Group {
                                 if revealGithubToken {
-                                    TextField("可选: 提升 API 请求限额", text: $appState.settingsDraft.githubToken)
+                                    TextField("Optional: raises the API rate limit", text: $appState.settingsDraft.githubToken)
                                 } else {
-                                    SecureField("可选: 提升 API 请求限额", text: $appState.settingsDraft.githubToken)
+                                    SecureField("Optional: raises the API rate limit", text: $appState.settingsDraft.githubToken)
                                 }
                             }
                             .textFieldStyle(.roundedBorder)
 
                             Button(action: { revealGithubToken.toggle() }) {
-                                ButtonLabel(icon: revealGithubToken ? "eye.slash" : "eye", text: revealGithubToken ? "隐藏" : "显示")
+                                ButtonLabel(icon: revealGithubToken ? "eye.slash" : "eye", text: revealGithubToken ? "Hide" : "Show")
                             }
                             .secondaryActionStyle()
                         }
 
-                        Text("说明：未配置 Token 时 GitHub API 每小时限 60 次请求，配置后提升至 5000 次/小时。Token 仅用于检查更新，权限范围只需 public_repo（或无权限亦可）。")
+                        Text("Note: without a token the GitHub API allows 60 requests per hour; with one, 5000 per hour. The token is only used to check for updates and needs no scopes (public_repo at most).")
                             .font(.caption)
                             .foregroundStyle(.secondary)
 
                         HStack(spacing: 10) {
                             Button(action: { appState.checkLauncherUpdates(manual: true) }) {
-                                ButtonLabel(icon: "arrow.down.circle", text: "检查更新")
+                                ButtonLabel(icon: "arrow.down.circle", text: "Check for updates")
                             }
                             .primaryActionStyle()
 
                             Button(action: { appState.checkLauncherUpdates(manual: true, forceRefresh: true) }) {
-                                ButtonLabel(icon: "arrow.clockwise", text: "强制刷新")
+                                ButtonLabel(icon: "arrow.clockwise", text: "Force refresh")
                             }
                             .secondaryActionStyle()
-                            .help("清除缓存并重新检查")
+                            .help("Clear cache and check again")
 
                             if let info = appState.releaseUpdateInfo, info.isUpdateAvailable, !appState.isReleaseVersionIgnored(info.latestVersion) {
-                                Text("发现新版本: \(info.latestVersion)")
+                                Text("New version available: \(info.latestVersion)")
                                     .font(.caption)
                                     .foregroundStyle(.orange)
                             }
@@ -228,12 +228,12 @@ struct SettingsView: View {
 
                         if !appState.settingsDraft.releaseIgnoredVersion.isEmpty {
                             HStack(spacing: 10) {
-                                Text("已忽略版本: \(appState.settingsDraft.releaseIgnoredVersion)")
+                                Text("Ignored version: \(appState.settingsDraft.releaseIgnoredVersion)")
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
 
                                 Button(action: { appState.clearIgnoredReleaseVersion() }) {
-                                    ButtonLabel(icon: "bell", text: "恢复提醒")
+                                    ButtonLabel(icon: "bell", text: "Restore reminder")
                                 }
                                 .secondaryActionStyle()
                             }
@@ -263,12 +263,12 @@ struct SettingsView: View {
                     VStack(alignment: .leading, spacing: 16) {
                         HStack(spacing: 12) {
                             Button(action: { appState.loadSettings() }) {
-                                ButtonLabel(icon: "arrow.counterclockwise", text: "恢复默认")
+                                ButtonLabel(icon: "arrow.counterclockwise", text: "Restore defaults")
                             }
                             .secondaryActionStyle()
                             
                             Button(action: { appState.saveSettings() }) {
-                                ButtonLabel(icon: "square.and.arrow.down", text: "保存并应用")
+                                ButtonLabel(icon: "square.and.arrow.down", text: "Save & Apply")
                             }
                             .primaryActionStyle()
                         }
@@ -278,7 +278,7 @@ struct SettingsView: View {
                         HStack(spacing: 8) {
                             Image(systemName: "doc.text.fill")
                                 .foregroundStyle(.secondary)
-                            Text("运行时用户层环境变量路径: \(FileSystemPaths.settingsFile.path)")
+                            Text("Runtime user-level environment file: \(FileSystemPaths.settingsFile.path)")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                                 .textSelection(.enabled)
@@ -314,12 +314,12 @@ struct SettingsView: View {
         let clientSecret = appState.settingsDraft.googleOAuthClientSecret.trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard !clientID.isEmpty, !clientSecret.isEmpty else {
-            credentialTestResult = "✗ 请先填写 Client ID 和 Client Secret"
+            credentialTestResult = "✗ Enter the Client ID and Client Secret first"
             return
         }
 
         guard !clientID.hasPrefix("YOUR_"), !clientSecret.hasPrefix("YOUR_") else {
-            credentialTestResult = "✗ 请替换为真实的 Google OAuth 凭据"
+            credentialTestResult = "✗ Replace these with real Google OAuth credentials"
             return
         }
 
@@ -341,7 +341,7 @@ struct SettingsView: View {
                 ]
 
                 guard let url = components?.url else {
-                    throw NSError(domain: "Settings", code: 1, userInfo: [NSLocalizedDescriptionKey: "无法构建授权 URL"])
+                    throw NSError(domain: "Settings", code: 1, userInfo: [NSLocalizedDescriptionKey: "Could not build the authorization URL"])
                 }
 
                 // 尝试访问 Google OAuth 端点，验证 client_id 是否被 Google 识别
@@ -350,29 +350,29 @@ struct SettingsView: View {
 
                 let (_, response) = try await URLSession.shared.data(for: request)
                 guard let http = response as? HTTPURLResponse else {
-                    throw NSError(domain: "Settings", code: 2, userInfo: [NSLocalizedDescriptionKey: "无效的响应"])
+                    throw NSError(domain: "Settings", code: 2, userInfo: [NSLocalizedDescriptionKey: "Invalid response"])
                 }
 
                 if http.statusCode == 200 {
                     await MainActor.run {
-                        credentialTestResult = "✓ 凭据格式有效，Google 端点可达"
+                        credentialTestResult = "✓ Credentials are well-formed and the Google endpoint is reachable"
                         isTestingCredentials = false
                     }
                 } else if http.statusCode == 400 {
                     await MainActor.run {
                         // 400 通常表示 redirect_uri 不匹配，但 client_id 被识别了
-                        credentialTestResult = "✓ Client ID 被 Google 识别（redirect_uri 将在实际登录时动态指定）"
+                        credentialTestResult = "✓ Client ID is recognized by Google (redirect_uri is set at sign-in time)"
                         isTestingCredentials = false
                     }
                 } else {
                     await MainActor.run {
-                        credentialTestResult = "✗ 服务器返回异常状态码 \(http.statusCode)"
+                        credentialTestResult = "✗ Server returned an unexpected status code \(http.statusCode)"
                         isTestingCredentials = false
                     }
                 }
             } catch {
                 await MainActor.run {
-                    credentialTestResult = "✗ 网络错误: \(error.localizedDescription)"
+                    credentialTestResult = "✗ Network error: \(error.localizedDescription)"
                     isTestingCredentials = false
                 }
             }
@@ -387,14 +387,14 @@ struct SettingsView: View {
                 Circle()
                     .fill(Color.gray)
                     .frame(width: 8, height: 8)
-                Text("未登录")
+                Text("Not signed in")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             } else {
                 Circle()
                     .fill(Color.green)
                     .frame(width: 8, height: 8)
-                Text("已登录 \(authViewModel.accounts.count) 个账户")
+                Text("\(authViewModel.accounts.count) account(s) signed in")
                     .font(.caption)
                     .foregroundStyle(.green)
             }

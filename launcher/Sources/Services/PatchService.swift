@@ -13,15 +13,15 @@ extension PatchServiceError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .targetAppMissing:
-            return "未找到 \(FileSystemPaths.targetApp.path)"
+            return "Not found: \(FileSystemPaths.targetApp.path)"
         case .copyFailed:
-            return "复制目标 App 失败"
+            return "Failed to copy the target app"
         case .runtimeAssetMissing(let name):
-            return "缺少运行时资源: \(name)"
+            return "Runtime resource missing: \(name)"
         case .plistWriteFailed:
-            return "写入 Info.plist 失败"
+            return "Failed to write Info.plist"
         case .rollbackFailed(let message):
-            return "修复失败且回滚失败: \(message)"
+            return "Repair failed and rollback failed: \(message)"
         }
     }
 }
@@ -55,49 +55,49 @@ final class PatchService {
         let destination = FileSystemPaths.patchedApp
         let destinationParent = destination.deletingLastPathComponent()
 
-        report("创建目标目录: \(destinationParent.path)", onProgress: onProgress)
+        report("Creating destination directory: \(destinationParent.path)", onProgress: onProgress)
         try fm.createDirectory(at: destinationParent, withIntermediateDirectories: true)
 
         if fm.fileExists(atPath: destination.path) {
-            report("清理旧修复包: \(destination.path)", onProgress: onProgress)
+            report("Removing the previous patched bundle: \(destination.path)", onProgress: onProgress)
             try fm.removeItem(at: destination)
         }
 
         do {
             do {
-                report("复制原版应用到: \(destination.path)", onProgress: onProgress)
+                report("Copying the original app to: \(destination.path)", onProgress: onProgress)
                 try fm.copyItem(at: FileSystemPaths.targetApp, to: destination)
             } catch {
                 throw PatchServiceError.copyFailed
             }
 
-            report("清理扩展属性 xattr", onProgress: onProgress)
+            report("Clearing extended attributes (xattr)", onProgress: onProgress)
             try clearExtendedAttributes()
-            report("嵌入运行时资源", onProgress: onProgress)
+            report("Embedding runtime resources", onProgress: onProgress)
             try embedRuntimeAssets()
-            report("写入 Info.plist", onProgress: onProgress)
+            report("Writing Info.plist", onProgress: onProgress)
             try rewriteInfoPlist()
-            report("写入 patch 元数据", onProgress: onProgress)
+            report("Writing patch metadata", onProgress: onProgress)
             try persistPatchMetadata()
-            report("签名前 preflight 检查", onProgress: onProgress)
+            report("Preflight check before signing", onProgress: onProgress)
             try signingService.preflight()
-            report("执行 inside-out 重签名", onProgress: onProgress)
+            report("Applying inside-out re-signing", onProgress: onProgress)
             try resignBundle(onProgress: onProgress)
             
             // 修复完成后自动清理隔离属性，避免 Gatekeeper 提示
-            report("清理修复包隔离属性 (xattr)", onProgress: onProgress)
+            report("Clearing quarantine attributes (xattr) on the patched bundle", onProgress: onProgress)
             try clearExtendedAttributesAfterSigning()
             
             // 针对 Gemini 应用，额外处理钥匙串访问权限
             if FileSystemPaths.activeApp == .gemini {
-                report("配置 Gemini 特殊权限", onProgress: onProgress)
+                report("Configure Gemini permissions", onProgress: onProgress)
                 try configureGeminiSpecialPermissions()
             }
         } catch {
-            report("检测到失败，执行自动回滚", onProgress: onProgress)
+            report("Failure detected, rolling back automatically", onProgress: onProgress)
             do {
                 try rollbackPatchedBundleIfNeeded()
-                report("回滚完成", onProgress: onProgress)
+                report("Rollback complete", onProgress: onProgress)
             } catch {
                 throw PatchServiceError.rollbackFailed(error.localizedDescription)
             }
@@ -123,7 +123,7 @@ final class PatchService {
 
         // Rollback helper: restore the user-facing symlink from .original backup
         func rollbackCLI() {
-            report("CLI 修复失败，正在回滚...", onProgress: onProgress)
+            report("CLI repair failed, rolling back...", onProgress: onProgress)
             if wrapperCreated, fm.fileExists(atPath: wrapper.path) {
                 try? fm.removeItem(at: wrapper)
             }
@@ -133,9 +133,9 @@ final class PatchService {
                 }
                 if fm.fileExists(atPath: backupPath) && fm.isExecutableFile(atPath: backupPath) {
                     try? fm.copyItem(at: URL(fileURLWithPath: backupPath), to: userSymlink)
-                    report("已还原 \(FileSystemPaths.activeApp.displayName) 原始二进制", onProgress: onProgress)
+                    report("\(FileSystemPaths.activeApp.displayName) original binary restored", onProgress: onProgress)
                 } else {
-                    report("⚠️ 无法还原原始二进制，请手动恢复 \(backupPath) -> \(userSymlink.path)", onProgress: onProgress)
+                    report("⚠️ Could not restore the original binary. Restore it manually: \(backupPath) -> \(userSymlink.path)", onProgress: onProgress)
                 }
             }
             // Clean up partial CLI directory but keep .original backup
@@ -167,24 +167,24 @@ final class PatchService {
             }()
 
             guard fm.isExecutableFile(atPath: resolvedSource.path) else {
-                throw PatchServiceError.runtimeAssetMissing("\(FileSystemPaths.activeApp.displayName) 原始二进制不可执行: \(resolvedSource.path)")
+                throw PatchServiceError.runtimeAssetMissing("\(FileSystemPaths.activeApp.displayName) original binary is not executable: \(resolvedSource.path)")
             }
 
             // Capture version now — before we change the symlink and dylib injection kicks in
             let capturedVersion = detectInstalledTargetApp()?.version ?? "unknown"
 
             // 1. Create directory
-            report("创建 CLI 修复目录: \(cliDir.path)", onProgress: onProgress)
+            report("Creating CLI repair directory: \(cliDir.path)", onProgress: onProgress)
             try fm.createDirectory(at: cliDir, withIntermediateDirectories: true)
 
             // 2. Copy original binary (from resolved real source, not symlink)
-            report("复制 \(FileSystemPaths.activeApp.displayName) 二进制到 \(realBinary.path)", onProgress: onProgress)
+            report("Copying \(FileSystemPaths.activeApp.displayName) binary to \(realBinary.path)", onProgress: onProgress)
             if fm.fileExists(atPath: realBinary.path) {
                 let isExistingSymlink = (try? realBinary.resourceValues(forKeys: [.isSymbolicLinkKey]).isSymbolicLink) ?? false
                 let isExistingRealBinary = !isExistingSymlink
                 // If the existing real binary exists, reuse it
                 if isExistingRealBinary && fm.isExecutableFile(atPath: realBinary.path) {
-                    report("\(realBinary.lastPathComponent) 已存在，跳过复制", onProgress: onProgress)
+                    report("\(realBinary.lastPathComponent) already exists, skipping copy", onProgress: onProgress)
                 } else {
                     try fm.removeItem(at: realBinary)
                 }
@@ -195,24 +195,24 @@ final class PatchService {
 
             // 3. Copy dylib
             let dylibSource = try resolveDylibSource()
-            report("复制 dylib: \(dylibSource.path)", onProgress: onProgress)
+            report("Copying dylib: \(dylibSource.path)", onProgress: onProgress)
             try copyFileReplacingExisting(from: dylibSource, to: dylibDest)
 
             // 4. Copy entitlements
             let entitlementsSource = try resolveEntitlementsSource()
-            report("复制 entitlements.plist", onProgress: onProgress)
+            report("Copying entitlements.plist", onProgress: onProgress)
             try copyFileReplacingExisting(from: entitlementsSource, to: entitlementsDest)
 
             // 5. Ensure proxy config exists (global, shared by all apps)
             let configSource = try resolveProxyConfigSource()
-            report("代理配置文件: \(configSource.path)", onProgress: onProgress)
+            report("Proxy configuration file: \(configSource.path)", onProgress: onProgress)
 
             // 6. Re-sign the real binary
-            report("重签名 \(realBinary.lastPathComponent)", onProgress: onProgress)
+            report("Re-signing \(realBinary.lastPathComponent)", onProgress: onProgress)
             try signingService.signSingleBinary(at: realBinary, entitlementsURL: entitlementsDest)
 
             // 7. Create wrapper script
-            report("生成 wrapper 脚本: \(wrapper.path)", onProgress: onProgress)
+            report("Generating wrapper script: \(wrapper.path)", onProgress: onProgress)
             if fm.fileExists(atPath: wrapper.path) {
                 try fm.removeItem(at: wrapper)
             }
@@ -224,7 +224,7 @@ final class PatchService {
             let wrapperContent = """
             #!/bin/bash
             # antigravity-proxy-wrapper — generated by Antigravity Proxy Launcher.
-            # Regenerate with "修复"; do not edit by hand.
+            # Regenerate with "Repair"; do not edit by hand.
             # Resolve the real path of this script (follow symlinks) so the sibling
             # binary is found regardless of how the wrapper is invoked.
             SCRIPT_PATH="$0"
@@ -251,7 +251,7 @@ final class PatchService {
             # so the injected dylib is actually loaded.
             if [ -x "$SCRIPT_DIR/\(realBinaryName)" ] && [ -f "$SCRIPT_DIR/entitlements.plist" ]; then
                 if ! codesign -d --entitlements - "$SCRIPT_DIR/\(realBinaryName)" 2>/dev/null | grep -q "disable-library-validation"; then
-                    codesign --force --options runtime --sign - --entitlements "$SCRIPT_DIR/entitlements.plist" "$SCRIPT_DIR/\(realBinaryName)" >/dev/null 2>&1 || echo "[agy-proxy] 警告: 重签名失败，DYLD 注入可能不生效" >&2
+                    codesign --force --options runtime --sign - --entitlements "$SCRIPT_DIR/entitlements.plist" "$SCRIPT_DIR/\(realBinaryName)" >/dev/null 2>&1 || echo "[agy-proxy] warning: re-signing failed, DYLD injection may not take effect" >&2
                 fi
             fi
 
@@ -274,7 +274,7 @@ final class PatchService {
             wrapperCreated = true
 
             // 8. Update user-facing symlink — always preserve the real binary as .original
-            report("更新符号链接: \(userSymlink.path) -> \(wrapper.path)", onProgress: onProgress)
+            report("Updating symbolic link: \(userSymlink.path) -> \(wrapper.path)", onProgress: onProgress)
             let isSymlink = (try? userSymlink.resourceValues(forKeys: [.isSymbolicLinkKey]).isSymbolicLink) ?? false
 
             // Ensure a .original backup of the real binary exists BEFORE we replace the symlink
@@ -286,21 +286,21 @@ final class PatchService {
                        fm.fileExists(atPath: resolved.path),
                        fm.isExecutableFile(atPath: resolved.path) {
                         try fm.copyItem(at: resolved, to: URL(fileURLWithPath: backupPath))
-                        report("已备份原始二进制 (从 symlink 解析): \(backupPath)", onProgress: onProgress)
+                        report("Original binary backed up (resolved through the symlink): \(backupPath)", onProgress: onProgress)
                     } else if fm.isExecutableFile(atPath: resolvedSource.path)
                                 && resolvedSource.path != wrapper.path {
                         try fm.copyItem(at: resolvedSource, to: URL(fileURLWithPath: backupPath))
-                        report("已备份原始二进制 (从 resolvedSource): \(backupPath)", onProgress: onProgress)
+                        report("Original binary backed up (from resolvedSource): \(backupPath)", onProgress: onProgress)
                     }
                 } else if fm.isExecutableFile(atPath: userSymlink.path) {
                     try fm.copyItem(at: userSymlink, to: URL(fileURLWithPath: backupPath))
-                    report("已备份原始二进制: \(backupPath)", onProgress: onProgress)
+                    report("Original binary backed up: \(backupPath)", onProgress: onProgress)
                 }
             }
 
             // Verify backup exists before proceeding to the destructive step
             guard fm.fileExists(atPath: backupPath) && fm.isExecutableFile(atPath: backupPath) else {
-                throw PatchServiceError.runtimeAssetMissing("备份原始二进制失败，中止修复以保护原文件")
+                throw PatchServiceError.runtimeAssetMissing("Failed to back up the original binary. Repair aborted to protect the original file.")
             }
 
             // Remove existing symlink or file and create new symlink (destructive step)
@@ -311,7 +311,7 @@ final class PatchService {
             try fm.createSymbolicLink(at: userSymlink, withDestinationURL: wrapper)
 
             // 9. Persist metadata (use version captured before patching)
-            report("写入 patch 元数据", onProgress: onProgress)
+            report("Writing patch metadata", onProgress: onProgress)
             try persistPatchMetadata(targetVersion: capturedVersion)
         } catch {
             rollbackCLI()

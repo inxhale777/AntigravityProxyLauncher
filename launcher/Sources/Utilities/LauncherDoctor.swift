@@ -10,18 +10,18 @@ struct LauncherDoctor {
 
     func run() -> Int32 {
         print("=== Antigravity Proxy Launcher Doctor ===")
-        print("时间: \(Date())")
-        print("目标路径: \(FileSystemPaths.targetApp.path)")
-        print("修复路径: \(FileSystemPaths.patchedApp.path)")
+        print("Time: \(Date())")
+        print("Target path: \(FileSystemPaths.targetApp.path)")
+        print("Patched app path: \(FileSystemPaths.patchedApp.path)")
 
         guard let app = detection.detectInstalledTargetApp() else {
-            let failure = LauncherFailure(code: .targetAppMissing, message: "未检测到原版 App")
-            print("错误: \(failure.formatted)")
-            print("建议: 确保 \(FileSystemPaths.targetApp.path) 存在")
+            let failure = LauncherFailure(code: .targetAppMissing, message: "Original app not detected")
+            print("Error: \(failure.formatted)")
+            print("Tip: make sure \(FileSystemPaths.targetApp.path) exists")
             return failure.codeValue
         }
 
-        print("状态: 检测到原版 App")
+        print("Status: original app detected")
         if app.bundleIdentifier.isEmpty {
             print("Bundle ID: N/A (CLI binary)")
         } else {
@@ -39,16 +39,16 @@ struct LauncherDoctor {
             FileManager.default.fileExists(atPath: $0.path)
         }
         if let dylibSource {
-            print("Dylib 资源: 已找到 (\(dylibSource.path))")
+            print("Dylib resource: found (\(dylibSource.path))")
         } else {
-            print("Dylib 资源: 缺失")
-            let failure = LauncherFailure(code: .runtimeAssetMissing, message: "libAntigravityTun.dylib 缺失")
-            print("错误: \(failure.formatted)")
-            print("建议: 运行 legacy_scripts/compile_without_xcode.sh，或放置到 launcher/Resources、legacy_scripts")
+            print("Dylib resource: missing")
+            let failure = LauncherFailure(code: .runtimeAssetMissing, message: "libAntigravityTun.dylib is missing")
+            print("Error: \(failure.formatted)")
+            print("Tip: run legacy_scripts/compile_without_xcode.sh, or place it in launcher/Resources or legacy_scripts")
             return failure.codeValue
         }
 
-        print("Doctor 检查完成: 可继续执行 GUI 修复流程。")
+        print("Doctor check finished: the GUI repair flow can continue.")
         return LauncherErrorCode.success.rawValue
     }
 
@@ -56,11 +56,11 @@ struct LauncherDoctor {
     func verifyPatchedAppFromCLI() -> Int32 {
         do {
             try verifier.verifyPatchedResult()
-            print("patched app 验证通过")
+            print("Patched app verified")
             return LauncherErrorCode.success.rawValue
         } catch {
             let failure = LauncherErrorMapper.map(error)
-            print("patched app 验证失败: \(failure.formatted)")
+            print("Patched app verification failed: \(failure.formatted)")
             return failure.codeValue
         }
     }
@@ -70,33 +70,33 @@ struct LauncherDoctor {
 
         let doctorCode = run()
         if doctorCode != 0 {
-            print("中止: doctor 检查未通过。")
+            print("Aborted: doctor check failed.")
             return doctorCode
         }
 
         do {
-            print("[1/4] 迁移数据")
+            print("[1/4] Migrate data")
             try migration.migrateSandboxData()
 
-            print("[2/4] 执行 patch")
+            print("[2/4] Apply patch")
             try patch.preparePatchedBundle(onProgress: { message in
                 print("  - \(message)")
             })
 
-            print("[3/4] 验证 patch")
+            print("[3/4] Verify patch")
             try verifier.verifyPatchedResult()
 
-            print("[4/4] 启动修复版")
+            print("[4/4] Launch patched app")
             let _ = try runAsyncBlocking {
                 let settings = try? settingsService.load()
                 try await launch.launchPatchedApp(settings: settings)
             }
 
-            print("CLI 全流程执行成功")
+            print("CLI run completed successfully")
             return LauncherErrorCode.success.rawValue
         } catch {
             let failure = LauncherErrorMapper.map(error)
-            print("CLI 全流程执行失败: \(failure.formatted)")
+            print("CLI run failed: \(failure.formatted)")
             return failure.codeValue
         }
     }

@@ -13,7 +13,7 @@ extension ProxyConfigServiceError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .invalidPort(let port):
-            return "代理端口不合法: \(port)，应在 1-65535 之间"
+            return "Invalid proxy port: \(port). Use a value between 1 and 65535"
         }
     }
 }
@@ -38,7 +38,7 @@ struct ProxyConfigService {
                     .replacingOccurrences(of: ":", with: "-")
                 try? FileManager.default.copyItem(atPath: brokenPath, toPath: backupPath)
                 try? FileManager.default.removeItem(atPath: brokenPath)
-                LauncherLogger.warn("proxy_config.json 已损坏，已备份至 \(backupPath)，将使用默认配置")
+                LauncherLogger.warn("proxy_config.json is corrupt. Backed up to \(backupPath); using default settings")
             }
         }
 
@@ -87,7 +87,7 @@ struct ProxyConfigService {
 
         if let detected = SystemProxyDetector.detect() {
             config.proxy = detected
-            LauncherLogger.info("检测到系统代理 \(detected.type)://\(detected.host):\(detected.port)，作为初始上游配置")
+            LauncherLogger.info("System proxy \(detected.type)://\(detected.host):\(detected.port) detected and used as the initial upstream")
         }
 
         _ = try self.saveForNextPatch(config)

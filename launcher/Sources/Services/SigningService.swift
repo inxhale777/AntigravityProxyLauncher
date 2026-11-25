@@ -32,7 +32,7 @@ struct SigningService {
         } catch {
             throw CommandRunnerError.commandFailed(
                 tool: "codesign",
-                message: "Ad-hoc 签名能力不可用，请确认 Xcode Command Line Tools 已安装。\(error.localizedDescription)"
+                message: "Ad-hoc signing is unavailable. Make sure Xcode Command Line Tools are installed. \(error.localizedDescription)"
             )
         }
     }

@@ -19,7 +19,7 @@ struct PatchedAppHealthService {
         }
 
         guard let metadata = latestMetadata() else {
-            return .repairRequired("未找到 patch 元数据，请重新修复。")
+            return .repairRequired("Patch metadata not found. Repair again.")
         }
 
         if metadata.targetVersion != targetVersion {
@@ -30,7 +30,7 @@ struct PatchedAppHealthService {
             .appendingPathComponent("Contents/Resources/libAntigravityTun.dylib")
 
         guard fm.fileExists(atPath: dylib.path) else {
-            return .repairRequired("修复包缺少 dylib，请重新修复。")
+            return .repairRequired("The patched bundle is missing the dylib. Repair again.")
         }
 
         return .ready
@@ -45,7 +45,7 @@ struct PatchedAppHealthService {
         guard fm.fileExists(atPath: wrapper.path) else { return .missing }
 
         guard let metadata = latestMetadata() else {
-            return .repairRequired("未找到 patch 元数据，请重新修复。")
+            return .repairRequired("Patch metadata not found. Repair again.")
         }
 
         if metadata.targetVersion != targetVersion {
@@ -54,11 +54,11 @@ struct PatchedAppHealthService {
 
         guard fm.fileExists(atPath: realBinary.path),
               fm.fileExists(atPath: dylib.path) else {
-            return .repairRequired("修复目录缺少关键资源，请重新修复。")
+            return .repairRequired("The repair directory is missing critical resources. Repair again.")
         }
 
         guard fm.isExecutableFile(atPath: wrapper.path) else {
-            return .repairRequired("wrapper 脚本不可执行，请重新修复。")
+            return .repairRequired("The wrapper script is not executable. Repair again.")
         }
 
         // The CLI's bundled auto-updater (or a manual reinstall) can overwrite
@@ -67,11 +67,11 @@ struct PatchedAppHealthService {
         // CLI dials Google directly (login fails with "token exchange failed:
         // i/o timeout"). Detect both halves of that drift.
         guard isProxyWrapper(at: wrapper) else {
-            return .repairRequired("CLI 入口已被官方自动更新覆盖，注入已失效，请重新修复。")
+            return .repairRequired("The CLI entry point was replaced by the official auto-update and the injection no longer works. Repair again.")
         }
 
         guard binaryHasInjectionEntitlement(at: realBinary) else {
-            return .repairRequired("CLI 二进制签名已被覆盖，系统会忽略 DYLD 注入，请重新修复。")
+            return .repairRequired("The CLI binary signature was overwritten, so macOS ignores the DYLD injection. Repair again.")
         }
 
         return .ready
