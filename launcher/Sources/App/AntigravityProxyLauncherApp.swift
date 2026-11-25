@@ -66,14 +66,6 @@ struct AntigravityProxyLauncherApp: App {
                 .environmentObject(appState)
                 .environmentObject(authViewModel)
                 .frame(minWidth: 820, minHeight: 560)
-                .sheet(isPresented: Binding(
-                    get: { !appState.isActivated },
-                    set: { _ in }
-                )) {
-                    ActivationView()
-                        .environmentObject(appState)
-                        .interactiveDismissDisabled(true)
-                }
         }
 
         MenuBarExtra {

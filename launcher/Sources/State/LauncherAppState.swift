@@ -26,7 +26,6 @@ struct MenuBarAppStatus {
 @MainActor
 final class LauncherAppState: ObservableObject {
     @Published var selectedTab: LauncherTab = .overview
-    @Published var isActivated: Bool = false
     @Published var status: AppStatus = .targetAppMissing
     @Published var appInfo: AppInfo?
     @Published var workflowItems: [LaunchWorkflowItem] = LaunchWorkflowStep.allCases.map {
@@ -473,7 +472,6 @@ final class LauncherAppState: ObservableObject {
             }
 
             settingsDraft = loadedSettings
-            isActivated = loadedSettings.isActivated
             settingsErrorMessage = nil
             applyDockIconSetting()
             checkLauncherUpdates(manual: false)
@@ -499,31 +497,6 @@ final class LauncherAppState: ObservableObject {
             settingsErrorMessage = "Failed to save settings: \(error.localizedDescription)"
             settingsStatusMessage = nil
             appendLog("Failed to save settings: \(error.localizedDescription)")
-        }
-    }
-
-    private let validActivationCodes: Set<String> = [
-        "QUctN0syTS05WDRQ",
-        "QUctM044US02VDJX",
-        "QUctNUoxTC04UjNZ",
-        "QUctMk05Sy00UDdO",
-        "QUctOFEzVC02VzFK"
-    ]
-
-    func verifyActivation(code: String) -> (success: Bool, message: String) {
-        let normalizedCode = code.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
-        let encoded = Data(normalizedCode.utf8).base64EncodedString()
-        if normalizedCode.isEmpty {
-            return (false, "The activation code cannot be empty")
-        }
-        
-        if validActivationCodes.contains(encoded) {
-            settingsDraft.isActivated = true
-            isActivated = true
-            saveSettings()
-            return (true, "Activated")
-        } else {
-            return (false, "Invalid activation code. Follow the author's WeChat account to get the correct one")
         }
     }
 
